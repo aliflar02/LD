@@ -16,8 +16,7 @@ public class OverLayUIController : MonoBehaviour
         // 初始化
         blackFadeImage.gameObject.SetActive(true);
         redFlashImage.gameObject.SetActive(false);
-        //AudioManager.Instance.PlayBGM("BGM_MainTheme");
-        Debug.Log("打开背景音乐");
+        AudioManager.Instance.PlayBGM();
 
         // 监听事件
         MUIEventListener.Get(blackFadeImage.gameObject).onClick += OnOverlayClicked;

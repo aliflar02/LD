@@ -9,17 +9,16 @@ public class MainUIPanelController : MonoBehaviour
     [SerializeField] private GameObject bed_hotspot;
     [SerializeField] private GameObject desk_hotspot;
     [SerializeField] private GameObject shelf_hotspot;
-    [SerializeField] private GameObject box_hotspot;
 
     // Start is called before the first frame update
     void Start()
     {
-        MUIEventListener.Get(lamp_hotspot).onClick += OnLampHotspotClicked;
-        MUIEventListener.Get(bed_hotspot).onClick += OnBedHotspotClicked;
-        MUIEventListener.Get(desk_hotspot).onClick += OnDeskHotspotClicked;
-        MUIEventListener.Get(shelf_hotspot).onClick += OnShelfHotspotClicked;
-        MUIEventListener.Get(box_hotspot).onClick += OnBoxHotspotClicked;
+        MUIEventListener.Get(lamp_hotspot).onClick = OnLampHotspotClicked;
+        MUIEventListener.Get(bed_hotspot).onClick = OnBedHotspotClicked;
+        MUIEventListener.Get(desk_hotspot).onClick = OnDeskHotspotClicked;
+        MUIEventListener.Get(shelf_hotspot).onClick = OnShelfHotspotClicked;
     }
+
 
     private void OnLampHotspotClicked(GameObject go)
     {
@@ -45,18 +44,5 @@ public class MainUIPanelController : MonoBehaviour
         UIManager.Instance.ShowFocusUI(FocusPanelType.Shelf);
     }
 
-    private void OnBoxHotspotClicked(GameObject go)
-    {
-        Debug.Log("点击了箱子热点，显示箱子界面");
-        UIManager.Instance.ShowFocusUI(FocusPanelType.BoxResult);
-    }
 
-    void OnDestroy()
-    {
-        MUIEventListener.Get(lamp_hotspot).onClick -= OnLampHotspotClicked;
-        MUIEventListener.Get(bed_hotspot).onClick -= OnBedHotspotClicked;
-        MUIEventListener.Get(desk_hotspot).onClick -= OnDeskHotspotClicked;
-        MUIEventListener.Get(shelf_hotspot).onClick -= OnShelfHotspotClicked;
-        MUIEventListener.Get(box_hotspot).onClick -= OnBoxHotspotClicked;
-    }
 }

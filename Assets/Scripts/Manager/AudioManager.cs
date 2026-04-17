@@ -6,8 +6,8 @@ using UnityEngine;
 
 public interface IAudioManager : ISingleton
 {
-    void PlayBGM(string musicName);
-    void StopBGM(string musicName);
+    void PlayBGM(string musicName = "");
+    void StopBGM();
     void PlaySFX(string fxName);
 }
 
@@ -36,13 +36,14 @@ public class AudioManager : MonoSingleton<AudioManager>, IAudioManager
         Debug.Log($"PlaySFX: {fxName}");
     }
 
-    public void PlayBGM(string musicName)
+    public void PlayBGM(string musicName = "")
     {
+        musicSource.Play();
         Debug.Log($"PlayBGM: {musicName}");
     }
 
-    public void StopBGM(string musicName)
+    public void StopBGM()
     {
-        Debug.Log($"StopBGM: {musicName}");
+        musicSource.Stop();
     }
 }
