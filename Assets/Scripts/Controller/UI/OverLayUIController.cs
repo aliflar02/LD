@@ -8,6 +8,7 @@ public class OverLayUIController : MonoBehaviour
     [Header("全屏遮罩")]
     [SerializeField] private Image blackFadeImage;
     [SerializeField] private Image redFlashImage;
+    [SerializeField] private Image BGImage;
 
     [SerializeField] private bool hasClicked = false;
 
@@ -19,8 +20,8 @@ public class OverLayUIController : MonoBehaviour
         AudioManager.Instance.PlayBGM();
 
         // 监听事件
-        MUIEventListener.Get(blackFadeImage.gameObject).onClick += OnOverlayClicked;
-        MUIEventListener.Get(redFlashImage.gameObject).onClick += OnRedFlashClicked;
+        MUIEventListener.Get(blackFadeImage.gameObject).onClick = OnOverlayClicked;
+        MUIEventListener.Get(redFlashImage.gameObject).onClick = OnRedFlashClicked;
     }
 
     private void OnOverlayClicked(GameObject go)
@@ -31,7 +32,11 @@ public class OverLayUIController : MonoBehaviour
             Debug.Log("弹出人物立绘和对话框 “莱特博士让我来取文件，这里好黑…”");
             // 点击后执行的逻辑，显示煤油灯图片
             redFlashImage.gameObject.SetActive(true);
-            redFlashImage.DOFade(0.5f, 0.5f).From(0);
+            //显示出底部暗的环境
+            blackFadeImage.DOFade(0F, 0.5f).From(1f).OnComplete(() =>
+            {
+                blackFadeImage.gameObject.SetActive(false);
+            });
         }
 
     }
@@ -43,20 +48,13 @@ public class OverLayUIController : MonoBehaviour
         {
             Debug.Log("点击煤油灯，淡出遮罩，打开煤油灯界面");
             // 点击后执行的逻辑，淡出遮罩
-            redFlashImage.DOFade(0, 0.5f);
-            blackFadeImage.DOFade(0, 0.5f).OnComplete(() =>
+            redFlashImage.gameObject.SetActive(false);
+            BGImage.DOFade(0, 0.5f).OnComplete(() =>
             {
-                blackFadeImage.gameObject.SetActive(false);
                 gameObject.SetActive(false);
             });
             UIManager.Instance.ShowFocusUI(FocusPanelType.Lamp);
         }
     }
 
-    void OnDestroy()
-    {
-        // 取消事件监听
-        MUIEventListener.Get(blackFadeImage.gameObject).onClick -= OnOverlayClicked;
-        MUIEventListener.Get(redFlashImage.gameObject).onClick -= OnRedFlashClicked;
-    }
 }

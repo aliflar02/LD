@@ -21,7 +21,6 @@ public class PersistentUIController : MonoBehaviour
     [Obsolete]
     [SerializeField] private List<EItemType> gotItems = new();
     [SerializeField] private TMP_Text clickHintText;
-    [SerializeField] private Button btnExit;
     void Awake()
     {
         slotPrefab.gameObject.SetActive(false);
@@ -29,13 +28,7 @@ public class PersistentUIController : MonoBehaviour
     }
     void Start()
     {
-        btnExit.onClick.AddListener(() =>
-        {
-            if (Application.isEditor)
-                UnityEditor.EditorApplication.isPlaying = false;
-            else
-                Application.Quit();
-        });
+
     }
 
     public void GetItem(EItemType itemType)
