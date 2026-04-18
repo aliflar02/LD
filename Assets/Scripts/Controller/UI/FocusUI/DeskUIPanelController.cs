@@ -12,7 +12,16 @@ public class DeskUIPanelController : MonoBehaviour
     {
         MUIEventListener.Get(boxObject).onClick = _ =>
         {
-            UIManager.Instance.ShowFocusUI(FocusPanelType.BoxResult);
+            if (GameManager.Instance.Model.GotItems.Contains(EItemType.Photo))
+            {
+                Debug.Log("已经获得了照片，显示箱子结果界面");
+                UIManager.Instance.ShowFocusUI(FocusPanelType.BoxResult);
+            }
+            else
+            {
+                Debug.Log("没有获得照片，显示密码界面");
+                UIManager.Instance.ShowFocusUI(FocusPanelType.Password);
+            }
         };
         MUIEventListener.Get(gameObject).onClick = _ =>
         {

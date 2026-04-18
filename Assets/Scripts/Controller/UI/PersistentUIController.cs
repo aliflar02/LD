@@ -11,7 +11,8 @@ public enum EItemType
     None,
     Lamp,
     NewsPaper,
-    Note
+    Note,
+    Photo,
 }
 public class PersistentUIController : MonoBehaviour
 {

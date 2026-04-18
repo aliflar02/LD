@@ -11,7 +11,8 @@ public enum FocusPanelType
     Shelf,
     Password,
     BoxResult,
-    Note
+    Note,
+    Certificate,
 }
 
 public class FocusUIPanelController : MonoBehaviour
@@ -23,6 +24,7 @@ public class FocusUIPanelController : MonoBehaviour
     [SerializeField] private GameObject passwordPanel;
     [SerializeField] private GameObject boxResultPanel;
     [SerializeField] private GameObject notePanel;
+    [SerializeField] private GameObject certificatePanel;
     // Start is called before the first frame update
     void Awake()
     {
@@ -37,6 +39,7 @@ public class FocusUIPanelController : MonoBehaviour
         passwordPanel.SetActive(false);
         boxResultPanel.SetActive(false);
         notePanel.SetActive(false);
+        certificatePanel.SetActive(false);
     }
 
     public void ShowPanel(FocusPanelType panelType)
@@ -68,6 +71,10 @@ public class FocusUIPanelController : MonoBehaviour
                 break;
             case FocusPanelType.Note:
                 notePanel.SetActive(true);
+                break;
+            case FocusPanelType.Certificate:
+                //显示证明书界面
+                certificatePanel.SetActive(true);
                 break;
             default:
                 break;

@@ -46,6 +46,9 @@ public class SlotController : MonoBehaviour
             case EItemType.Note:
                 text.text = "Note";
                 break;
+            case EItemType.Photo:
+                text.text = "Photo";
+                break;
             default:
                 break;
         }

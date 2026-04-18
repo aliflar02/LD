@@ -9,6 +9,7 @@ public interface IUIManager : ISingleton
     void HideUI(string uiName);
     void ShowFocusUI(FocusPanelType panelType);
     void HideFocusUI();//隐藏FocusUI使用这个，方便focusUI状态统一处理
+    void HidePersistentUI();
     void GetItem(EItemType itemType);
     void UseItem(EItemType itemType);
     void ShowTips(string tips);
@@ -63,6 +64,9 @@ public class UIManager : MonoSingleton<UIManager>, IUIManager
         focusUIPanelController.gameObject.SetActive(false);
         GameManager.Instance.Model.CurrentFocusPanelType = FocusPanelType.None;
     }
+
+    public void HidePersistentUI()
+    => persistentUIController.gameObject.SetActive(false);
 
     public void GetItem(EItemType itemType)
     {

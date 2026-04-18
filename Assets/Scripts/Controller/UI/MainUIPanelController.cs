@@ -29,6 +29,11 @@ public class MainUIPanelController : MonoBehaviour
     private void OnBedHotspotClicked(GameObject go)
     {
         Debug.Log("点击了床热点，显示床界面");
+        if (GameManager.Instance.Model.GotItems.Contains(EItemType.NewsPaper))
+        {
+            Debug.Log("已经获得了报纸，不显示床界面");
+            return;
+        }
         UIManager.Instance.ShowFocusUI(FocusPanelType.Bed);
     }
 
