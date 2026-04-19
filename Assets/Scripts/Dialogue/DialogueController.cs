@@ -1,8 +1,9 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
 
 public class DialogueController : MonoBehaviour
@@ -11,17 +12,35 @@ public class DialogueController : MonoBehaviour
     [Tooltip("对白数据库（DialogueDatabase），提供 sequenceId 对应的对白序列。")]
     [SerializeField] private DialogueDatabase database;
 
+    [Header("Intro")]
+    [TextArea(2, 6)]
+    [Tooltip("开场旁白文本（Intro Narration Text），默认显示在 NarrationRoot 上。")]
+    [SerializeField] private string introNarrationText = "你从黑暗中醒来，只记得一个模糊的声音告诉你，去你的意识深处，找到自己丢失的记忆……";
+    [Tooltip("点击开场旁白后要播放的首个对白序列（Intro Sequence Id）。")]
+    [SerializeField] private string introSequenceId = "SEQ_01_INTRO_WAKE";
+    [Min(0)]
+    [Tooltip("开场对白起始行索引（Intro Start Line Index），0 表示从 s1_l1 开始。")]
+    [SerializeField] private int introStartLineIndex = 0;
+    [Tooltip("启用时是否默认进入开场旁白模式。")]
+    [SerializeField] private bool showIntroNarrationOnEnable = true;
+
     [Header("UI References")]
-    [Tooltip("对话界面根对象（DialogueUI root），用于整体显示/隐藏。")]
+    [Tooltip("对话总系统根对象（DialogueUI），用于整体显示/隐藏。")]
+    [FormerlySerializedAs("dialogueRoot")]
+    [SerializeField] private GameObject dialogueUI;
+    [Tooltip("标准对白模式根对象（DialogueRoot），与 NarrationRoot 平级。")]
+    [FormerlySerializedAs("dialogueBox")]
     [SerializeField] private GameObject dialogueRoot;
-    [Tooltip("对白点击区域（DialogueBox），点击后请求推进对白。")]
-    [SerializeField] private GameObject dialogueBox;
-    [Tooltip("对白文本组件（DialogueText / TMP_Text），显示当前对白内容。")]
+    [Tooltip("标准对白文本组件（DialogueText / TMP_Text）。")]
     [SerializeField] private TMP_Text dialogueText;
-    [Tooltip("说话人文本组件（speakerText / TMP_Text），可选。")]
+    [Tooltip("说话人文本组件（SpeakerText / TMP_Text），可选。")]
     [SerializeField] private TMP_Text speakerText;
-    [Tooltip("立绘组件（portraitImage / Image），可选。")]
+    [Tooltip("立绘组件（Portrait / Image），可选。")]
     [SerializeField] private Image portraitImage;
+    [Tooltip("黑底旁白根对象（NarrationRoot），用于居中旁白模式。")]
+    [SerializeField] private GameObject narrationRoot;
+    [Tooltip("黑底旁白文本组件（NarrationText / TMP_Text）。")]
+    [SerializeField] private TMP_Text narrationText;
 
     [Header("Input")]
     [Tooltip("是否允许鼠标左键触发推进（advance）。")]
@@ -35,9 +54,9 @@ public class DialogueController : MonoBehaviour
     [Min(0.001f)]
     [Tooltip("默认逐字间隔（defaultCharInterval，秒/字）。")]
     [SerializeField] private float defaultCharInterval = 0.05f;
-    [Tooltip("空闲时隐藏（hideWhenIdle）：无对白播放时隐藏 DialogueUI / DialogueBox。")]
+    [Tooltip("空闲时隐藏（hideWhenIdle）：无对白播放时隐藏 DialogueUI。")]
     [SerializeField] private bool hideDialogueWhenIdle = true;
-    [Tooltip("隐藏时清空文本（clearTextWhenHidden）：清除对白文本与说话人文本。")]
+    [Tooltip("隐藏时清空文本（clearTextWhenHidden）。")]
     [SerializeField] private bool clearTextWhenHidden = true;
 
     [Header("Interaction Gate")]
@@ -57,23 +76,64 @@ public class DialogueController : MonoBehaviour
     private Coroutine playRoutine;
     private bool advanceRequested;
     private bool isPlaying;
+    private bool isShowingIntroNarration;
     private string currentSequenceId = string.Empty;
-    private MUIEventListener dialogueBoxListener;
+    private MUIEventListener dialogueRootListener;
+    private MUIEventListener narrationRootListener;
 
     public bool IsPlaying => isPlaying;
     public string CurrentSequenceId => currentSequenceId;
 
     private void Reset()
     {
-        if (dialogueRoot == null) dialogueRoot = gameObject;
-        if (dialogueBox == null) dialogueBox = gameObject;
+        if (dialogueUI == null) dialogueUI = gameObject;
+
+        var root = dialogueUI != null ? dialogueUI.transform : transform;
+        if (dialogueRoot == null)
+        {
+            dialogueRoot = FindChildObject(root, "DialogueRoot");
+            if (dialogueRoot == null)
+            {
+                dialogueRoot = FindChildObject(root, "DialogueBox");
+            }
+        }
+
+        if (narrationRoot == null)
+        {
+            narrationRoot = FindChildObject(root, "NarrationRoot");
+        }
     }
 
     private void Awake()
     {
-        if (dialogueRoot == null) dialogueRoot = gameObject;
-        HookDialogueBoxClick();
-        if (hideDialogueWhenIdle) SetDialogueVisible(false);
+        if (dialogueUI == null) dialogueUI = gameObject;
+        ResolveMissingReferences();
+        HookDialogueRootClick();
+        HookNarrationRootClick();
+
+        if (showIntroNarrationOnEnable)
+        {
+            ShowIntroNarration();
+        }
+        else if (hideDialogueWhenIdle)
+        {
+            SetDialogueVisible(false);
+        }
+    }
+
+    private void OnEnable()
+    {
+        if (!isPlaying)
+        {
+            if (showIntroNarrationOnEnable)
+            {
+                ShowIntroNarration();
+            }
+            else if (hideDialogueWhenIdle)
+            {
+                SetDialogueVisible(false);
+            }
+        }
     }
 
     private void Update()
@@ -90,10 +150,16 @@ public class DialogueController : MonoBehaviour
 
     private void OnDestroy()
     {
-        UnHookDialogueBoxClick();
+        UnHookDialogueRootClick();
+        UnHookNarrationRootClick();
     }
 
     public bool PlaySequence(string sequenceId)
+    {
+        return PlaySequence(sequenceId, 0);
+    }
+
+    public bool PlaySequence(string sequenceId, int startLineIndex)
     {
         if (database == null)
         {
@@ -107,10 +173,15 @@ public class DialogueController : MonoBehaviour
             return false;
         }
 
-        return PlaySequence(sequence);
+        return PlaySequence(sequence, startLineIndex);
     }
 
     public bool PlaySequence(DialogueSequence sequence)
+    {
+        return PlaySequence(sequence, 0);
+    }
+
+    public bool PlaySequence(DialogueSequence sequence, int startLineIndex)
     {
         if (sequence == null)
         {
@@ -130,13 +201,20 @@ public class DialogueController : MonoBehaviour
             return false;
         }
 
+        var safeStartLineIndex = Mathf.Clamp(startLineIndex, 0, sequence.Lines.Count - 1);
+        if (safeStartLineIndex != startLineIndex)
+        {
+            Debug.LogWarning(
+                $"[{nameof(DialogueController)}] Start line index {startLineIndex} is out of range for '{sequence.SequenceId}', fallback to {safeStartLineIndex}.");
+        }
+
         if (playRoutine != null)
         {
             StopCoroutine(playRoutine);
         }
 
         CleanupPlaybackState();
-        playRoutine = StartCoroutine(PlaySequenceRoutine(sequence));
+        playRoutine = StartCoroutine(PlaySequenceRoutine(sequence, safeStartLineIndex));
         return true;
     }
 
@@ -156,18 +234,30 @@ public class DialogueController : MonoBehaviour
         advanceRequested = true;
     }
 
-    private IEnumerator PlaySequenceRoutine(DialogueSequence sequence)
+    private IEnumerator PlaySequenceRoutine(DialogueSequence sequence, int startLineIndex)
     {
         isPlaying = true;
+        isShowingIntroNarration = false;
         currentSequenceId = sequence.SequenceId;
         advanceRequested = false;
+
+        var firstLine = GetFirstValidLine(sequence, startLineIndex);
+        if (firstLine != null)
+        {
+            // 先应用首行可视状态，避免根节点激活时短暂显示错误界面。
+            ApplyLineVisuals(firstLine);
+            if (firstLine.ViewMode == DialogueLineViewMode.CenterBlackNarration && narrationRoot == null)
+            {
+                Debug.LogWarning($"[{nameof(DialogueController)}] First line is CenterBlackNarration, but narrationRoot is not assigned.");
+            }
+        }
 
         SetDialogueVisible(true);
         SetInteractionGate(true);
         RaiseSignal(sequence.OnSequenceStartSignal);
         sequenceStarted.Invoke(currentSequenceId);
 
-        for (var i = 0; i < sequence.Lines.Count; i++)
+        for (var i = startLineIndex; i < sequence.Lines.Count; i++)
         {
             var line = sequence.Lines[i];
             if (line == null) continue;
@@ -196,17 +286,18 @@ public class DialogueController : MonoBehaviour
 
     private IEnumerator TypeLineRoutine(DialogueLine line)
     {
-        if (dialogueText == null)
+        var targetText = GetLineTargetText(line);
+        if (targetText == null)
         {
             yield break;
         }
 
         var content = line.Content ?? string.Empty;
-        dialogueText.text = content;
-        dialogueText.maxVisibleCharacters = 0;
-        dialogueText.ForceMeshUpdate();
+        targetText.text = content;
+        targetText.maxVisibleCharacters = 0;
+        targetText.ForceMeshUpdate();
 
-        var visibleCharCount = dialogueText.textInfo.characterCount;
+        var visibleCharCount = targetText.textInfo.characterCount;
         var interval = line.CharIntervalOverride > 0f ? line.CharIntervalOverride : defaultCharInterval;
 
         for (var visible = 1; visible <= visibleCharCount; visible++)
@@ -217,11 +308,21 @@ public class DialogueController : MonoBehaviour
                 break;
             }
 
-            dialogueText.maxVisibleCharacters = visible;
+            targetText.maxVisibleCharacters = visible;
             yield return new WaitForSeconds(interval);
         }
 
-        dialogueText.maxVisibleCharacters = int.MaxValue;
+        targetText.maxVisibleCharacters = int.MaxValue;
+    }
+
+    private TMP_Text GetLineTargetText(DialogueLine line)
+    {
+        if (line.ViewMode == DialogueLineViewMode.CenterBlackNarration && narrationText != null)
+        {
+            return narrationText;
+        }
+
+        return dialogueText;
     }
 
     private IEnumerator WaitForAdvanceInput()
@@ -231,6 +332,7 @@ public class DialogueController : MonoBehaviour
         {
             yield return null;
         }
+
         advanceRequested = false;
     }
 
@@ -255,6 +357,40 @@ public class DialogueController : MonoBehaviour
 
     private void ApplyLineVisuals(DialogueLine line)
     {
+        var narrationMode = line.ViewMode == DialogueLineViewMode.CenterBlackNarration;
+
+        if (narrationRoot != null)
+        {
+            narrationRoot.SetActive(narrationMode);
+        }
+
+        if (dialogueRoot != null)
+        {
+            dialogueRoot.SetActive(!narrationMode);
+        }
+
+        if (narrationMode)
+        {
+            if (speakerText != null)
+            {
+                speakerText.gameObject.SetActive(false);
+                speakerText.text = string.Empty;
+            }
+
+            if (portraitImage != null)
+            {
+                portraitImage.gameObject.SetActive(false);
+            }
+
+            if (dialogueText != null)
+            {
+                dialogueText.text = string.Empty;
+                dialogueText.maxVisibleCharacters = int.MaxValue;
+            }
+
+            return;
+        }
+
         if (speakerText != null)
         {
             var hasSpeaker = !string.IsNullOrWhiteSpace(line.Speaker);
@@ -274,18 +410,32 @@ public class DialogueController : MonoBehaviour
                 portraitImage.gameObject.SetActive(!line.HidePortraitWhenNull);
             }
         }
+
+        if (narrationText != null)
+        {
+            narrationText.text = string.Empty;
+            narrationText.maxVisibleCharacters = int.MaxValue;
+        }
     }
 
     private void SetDialogueVisible(bool visible)
     {
-        var shouldToggleRoot = dialogueRoot != null && dialogueRoot != gameObject;
+        var shouldToggleRoot = dialogueUI != null && dialogueUI != gameObject;
         if (hideDialogueWhenIdle && shouldToggleRoot)
         {
-            dialogueRoot.SetActive(visible);
+            dialogueUI.SetActive(visible);
         }
-        else if (dialogueBox != null)
+        else
         {
-            dialogueBox.SetActive(visible);
+            if (!visible && dialogueRoot != null)
+            {
+                dialogueRoot.SetActive(false);
+            }
+
+            if (!visible && narrationRoot != null)
+            {
+                narrationRoot.SetActive(false);
+            }
         }
 
         if (!visible && clearTextWhenHidden)
@@ -300,7 +450,178 @@ public class DialogueController : MonoBehaviour
             {
                 speakerText.text = string.Empty;
             }
+
+            if (narrationText != null)
+            {
+                narrationText.text = string.Empty;
+                narrationText.maxVisibleCharacters = int.MaxValue;
+            }
         }
+    }
+
+    private DialogueLine GetFirstValidLine(DialogueSequence sequence, int startLineIndex)
+    {
+        if (sequence?.Lines == null) return null;
+
+        var startIndex = Mathf.Clamp(startLineIndex, 0, sequence.Lines.Count - 1);
+        for (var i = startIndex; i < sequence.Lines.Count; i++)
+        {
+            if (sequence.Lines[i] != null)
+            {
+                return sequence.Lines[i];
+            }
+        }
+
+        return null;
+    }
+
+    private void ShowIntroNarration()
+    {
+        isShowingIntroNarration = true;
+        isPlaying = false;
+        advanceRequested = false;
+        currentSequenceId = string.Empty;
+
+        if (dialogueUI != null && dialogueUI != gameObject)
+        {
+            dialogueUI.SetActive(true);
+        }
+
+        if (narrationRoot != null)
+        {
+            narrationRoot.SetActive(true);
+        }
+
+        if (dialogueRoot != null)
+        {
+            dialogueRoot.SetActive(false);
+        }
+
+        if (narrationText != null)
+        {
+            narrationText.text = introNarrationText ?? string.Empty;
+            narrationText.maxVisibleCharacters = int.MaxValue;
+        }
+
+        if (dialogueText != null)
+        {
+            dialogueText.text = string.Empty;
+            dialogueText.maxVisibleCharacters = int.MaxValue;
+        }
+
+        if (speakerText != null)
+        {
+            speakerText.text = string.Empty;
+            speakerText.gameObject.SetActive(false);
+        }
+
+        if (portraitImage != null)
+        {
+            portraitImage.gameObject.SetActive(false);
+        }
+    }
+
+    private void BeginIntroDialogue()
+    {
+        isShowingIntroNarration = false;
+
+        if (string.IsNullOrWhiteSpace(introSequenceId))
+        {
+            Debug.LogWarning($"[{nameof(DialogueController)}] Intro sequence id is empty.");
+            if (narrationRoot != null)
+            {
+                narrationRoot.SetActive(false);
+            }
+
+            if (dialogueRoot != null)
+            {
+                dialogueRoot.SetActive(true);
+            }
+
+            return;
+        }
+
+        PlaySequence(introSequenceId, introStartLineIndex);
+    }
+
+    private void ResolveMissingReferences()
+    {
+        var root = dialogueUI != null ? dialogueUI.transform : transform;
+
+        // DialogueRoot 应绑定“标准对白模式根节点”，不应等于总根（DialogueUI）。
+        if (dialogueRoot == dialogueUI)
+        {
+            dialogueRoot = null;
+        }
+
+        if (dialogueRoot == null)
+        {
+            dialogueRoot = FindChildObject(root, "DialogueRoot");
+            if (dialogueRoot == null)
+            {
+                dialogueRoot = FindChildObject(root, "DialogueBox");
+            }
+        }
+
+        if (narrationRoot == null)
+        {
+            narrationRoot = FindChildObject(root, "NarrationRoot");
+        }
+
+        if (dialogueText == null && dialogueRoot != null)
+        {
+            dialogueText = dialogueRoot.GetComponentInChildren<TMP_Text>(true);
+        }
+
+        if (narrationText == null && narrationRoot != null)
+        {
+            narrationText = narrationRoot.GetComponentInChildren<TMP_Text>(true);
+        }
+
+        if (speakerText == null)
+        {
+            var speakerObject = FindChildObject(root, "SpeakerText");
+            if (speakerObject != null)
+            {
+                speakerText = speakerObject.GetComponent<TMP_Text>();
+            }
+        }
+
+        if (portraitImage == null)
+        {
+            var portraitObject = FindChildObject(root, "Portrait");
+            if (portraitObject != null)
+            {
+                portraitImage = portraitObject.GetComponent<Image>();
+            }
+        }
+    }
+
+    private GameObject FindChildObject(Transform root, string childName)
+    {
+        if (root == null || string.IsNullOrWhiteSpace(childName))
+        {
+            return null;
+        }
+
+        var child = FindDeepChild(root, childName);
+        return child != null ? child.gameObject : null;
+    }
+
+    private Transform FindDeepChild(Transform parent, string childName)
+    {
+        if (parent.name == childName) return parent;
+
+        for (var i = 0; i < parent.childCount; i++)
+        {
+            var child = parent.GetChild(i);
+            if (child.name == childName) return child;
+
+            var result = FindDeepChild(child, childName);
+            if (result != null) return result;
+        }
+
+        return null;
     }
 
     private void SetInteractionGate(bool lockInteraction)
@@ -310,7 +631,7 @@ public class DialogueController : MonoBehaviour
             cachedActiveStates.Clear();
             foreach (var go in disableWhilePlaying)
             {
-                if (go == null || go == dialogueRoot) continue;
+                if (go == null || go == dialogueUI) continue;
                 if (cachedActiveStates.ContainsKey(go)) continue;
 
                 cachedActiveStates.Add(go, go.activeSelf);
@@ -326,6 +647,7 @@ public class DialogueController : MonoBehaviour
                     pair.Key.SetActive(pair.Value);
                 }
             }
+
             cachedActiveStates.Clear();
         }
     }
@@ -350,23 +672,51 @@ public class DialogueController : MonoBehaviour
         signalRaised.Invoke(signalId);
     }
 
-    private void HookDialogueBoxClick()
+    private void HookDialogueRootClick()
     {
-        if (dialogueBox == null) return;
+        if (dialogueRoot == null) return;
 
-        dialogueBoxListener = MUIEventListener.Get(dialogueBox);
-        dialogueBoxListener.onClick += OnDialogueBoxClicked;
+        dialogueRootListener = MUIEventListener.Get(dialogueRoot);
+        dialogueRootListener.onClick += OnDialogueRootClicked;
     }
 
-    private void UnHookDialogueBoxClick()
+    private void UnHookDialogueRootClick()
     {
-        if (dialogueBoxListener == null) return;
-        dialogueBoxListener.onClick -= OnDialogueBoxClicked;
-        dialogueBoxListener = null;
+        if (dialogueRootListener == null) return;
+
+        dialogueRootListener.onClick -= OnDialogueRootClicked;
+        dialogueRootListener = null;
     }
 
-    private void OnDialogueBoxClicked(GameObject _)
+    private void HookNarrationRootClick()
     {
+        if (narrationRoot == null) return;
+
+        narrationRootListener = MUIEventListener.Get(narrationRoot);
+        narrationRootListener.onClick += OnNarrationRootClicked;
+    }
+
+    private void UnHookNarrationRootClick()
+    {
+        if (narrationRootListener == null) return;
+
+        narrationRootListener.onClick -= OnNarrationRootClicked;
+        narrationRootListener = null;
+    }
+
+    private void OnDialogueRootClicked(GameObject _)
+    {
+        RequestAdvance();
+    }
+
+    private void OnNarrationRootClicked(GameObject _)
+    {
+        if (isShowingIntroNarration && !isPlaying)
+        {
+            BeginIntroDialogue();
+            return;
+        }
+
         RequestAdvance();
     }
 }

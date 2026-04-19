@@ -1,12 +1,20 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
+
+public enum DialogueLineViewMode
+{
+    Standard = 0,
+    CenterBlackNarration = 1,
+}
 
 [Serializable]
 public class DialogueLine
 {
     [Tooltip("对白行标识（lineId），可选，主要用于调试定位。")]
     [SerializeField] private string lineId = "line";
+    [Tooltip("行显示模式（Line View Mode）：Standard=标准对白，CenterBlackNarration=黑底居中旁白。")]
+    [SerializeField] private DialogueLineViewMode viewMode = DialogueLineViewMode.Standard;
     [Tooltip("说话人名称（speaker），显示到说话人文本（speakerText）。")]
     [SerializeField] private string speaker = "";
     [TextArea(2, 6)]
@@ -26,6 +34,7 @@ public class DialogueLine
     [SerializeField] private string onLineEndSignal = "";
 
     public string LineId => lineId;
+    public DialogueLineViewMode ViewMode => viewMode;
     public string Speaker => speaker;
     public string Content => content;
     public Sprite Portrait => portrait;
