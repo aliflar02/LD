@@ -9,9 +9,19 @@ public class BoxResultUIPanelController : MonoBehaviour
     {
         MUIEventListener.Get(gameObject).onClick = _ =>
         {
-            UIManager.Instance.GetItem(EItemType.Photo);
-            UIManager.Instance.HideFocusUI();
+            AudioManager.Instance.PlaySFX(ESFXType.Click);
+            UIManager.Instance.ShowDialoguePanel();
+            UIManager.Instance.PlaySequence("SEQ_06_CERT_FOUND");
         };
+        UIManager.Instance.RegisterSequenceFinishedListener(sequenceId =>
+        {
+            if (sequenceId == "SEQ_06_CERT_FOUND")
+            {
+                UIManager.Instance.HideFocusUI();
+                UIManager.Instance.ShowItemPanel();
+                UIManager.Instance.GetItem(EItemType.Photo);
+            }
+        });
     }
 
 }

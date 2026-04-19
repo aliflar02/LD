@@ -156,6 +156,7 @@ public class DialogueController : MonoBehaviour
 
     public bool PlaySequence(string sequenceId)
     {
+        print("PlaySequence: " + sequenceId);
         return PlaySequence(sequenceId, 0);
     }
 

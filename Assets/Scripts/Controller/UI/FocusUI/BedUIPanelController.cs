@@ -10,9 +10,19 @@ public class BedUIPanelController : MonoBehaviour
     {
         MUIEventListener.Get(newspaperObject).onClick = _ =>
         {
-            UIManager.Instance.HideFocusUI();
-            UIManager.Instance.GetItem(EItemType.NewsPaper);
+            AudioManager.Instance.PlaySFX(ESFXType.Click);
+            UIManager.Instance.ShowDialoguePanel();
+            UIManager.Instance.PlaySequence("SEQ_03_NEWSPAPER_READ");
         };
+        UIManager.Instance.RegisterSequenceFinishedListener(sequenceId =>
+        {
+            if (sequenceId == "SEQ_03_NEWSPAPER_READ")
+            {
+                UIManager.Instance.GetItem(EItemType.NewsPaper);
+                UIManager.Instance.HideFocusUI();
+                UIManager.Instance.ShowItemPanel();
+            }
+        });
     }
 
 }

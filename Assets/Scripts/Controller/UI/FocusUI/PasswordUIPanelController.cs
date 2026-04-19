@@ -1,32 +1,63 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using DG.Tweening;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class PasswordUIPanelController : MonoBehaviour
 {
     [SerializeField] private List<GameObject> btnList;
     [SerializeField] private List<TMP_Text> textList;
+    [SerializeField] private GameObject boxObject;
+    [SerializeField] private Image outputBgImage;
+    [SerializeField] private Image RedMask;
     [SerializeField] private string correctPassword = "AAAAAB";
+    [SerializeField] private string inputPassword = "";
+    private int currentInputIndex = 0;
+
     // Start is called before the first frame update
     void Start()
     {
+        RedMask.gameObject.SetActive(false);
+        ClearInput();
+
         MUIEventListener.Get(gameObject).onClick = _ =>
         {
+            AudioManager.Instance.PlaySFX(ESFXType.Click);
             UIManager.Instance.HideFocusUI();
         };
 
-        int bindCount = Mathf.Min(btnList.Count, textList.Count);
-        for (int i = 0; i < bindCount; i++)
+        for (int i = 0; i < btnList.Count; i++)
         {
             int index = i; // 需要一个局部变量来捕获当前的索引
+            btnList[i].transform.localScale = Vector3.one;
+            TMP_Text text = btnList[i].GetComponentInChildren<TMP_Text>();
+            text.text = GetLetterByIndex(i);
             MUIEventListener.Get(btnList[i]).onClick = _ =>
             {
-                textList[index].text = GetNextLetter(textList[index].text);
-                // 检查密码是否正确
-                CheckPassword();
+                _.transform.DOPunchScale(Vector3.one * -0.1f, 0.2f, 1).SetEase(Ease.OutCubic);
+                AudioManager.Instance.PlaySFX(ESFXType.Click);
+                OnLetterButtonClicked(index);
             };
+        }
+    }
+
+    private void OnLetterButtonClicked(int letterIndex)
+    {
+        if (currentInputIndex >= textList.Count)
+        {
+            return;
+        }
+
+        string letter = GetLetterByIndex(letterIndex);
+        textList[currentInputIndex].text = letter;
+        currentInputIndex++;
+
+        if (currentInputIndex >= textList.Count)
+        {
+            CheckPassword();
         }
     }
 
@@ -38,28 +69,52 @@ public class PasswordUIPanelController : MonoBehaviour
             enteredPassword += text.text;
         }
 
+        inputPassword = enteredPassword;
+
         if (enteredPassword.Equals(correctPassword, StringComparison.OrdinalIgnoreCase))
         {
             Debug.Log("密码正确！");
-            UIManager.Instance.ShowFocusUI(FocusPanelType.BoxResult);
+            RedMask.gameObject.SetActive(true);
+            RedMask.DOFade(1f, 0.8f).From(0f).SetEase(Ease.OutCubic).OnComplete(() =>
+            {
+                boxObject.SetActive(false);
+                RedMask.DOFade(0f, 0.3f).SetEase(Ease.InCubic).OnComplete(() =>
+                {
+                    UIManager.Instance.ShowFocusUI(FocusPanelType.BoxResult);
+                });
+            });
+        }
+        else
+        {
+            Debug.Log("密码错误，已清空，请重新输入。");
+            outputBgImage.DOColor(Color.red, 0.2f).From(Color.white).SetEase(Ease.InCubic).OnComplete(() =>
+            {
+                outputBgImage.color = Color.white;
+                ClearInput();
+            });
         }
     }
 
-    private string GetNextLetter(string currentText)
+    private void ClearInput()
     {
-        if (string.IsNullOrEmpty(currentText))
+        currentInputIndex = 0;
+        inputPassword = string.Empty;
+        foreach (var text in textList)
+        {
+            text.text = string.Empty;
+        }
+    }
+
+    private string GetLetterByIndex(int index)
+    {
+        if (index < 0)
         {
             return "A";
         }
 
-        char currentChar = char.ToUpperInvariant(currentText[0]);
-        if (currentChar < 'A' || currentChar > 'Z')
-        {
-            return "A";
-        }
-
-        char nextChar = currentChar == 'Z' ? 'A' : (char)(currentChar + 1);
-        return nextChar.ToString();
+        int normalized = index % 26;
+        char c = (char)('A' + normalized);
+        return c.ToString();
     }
 
 

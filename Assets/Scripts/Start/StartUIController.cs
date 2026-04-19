@@ -68,6 +68,10 @@ public class StartUIController : MonoBehaviour
         {
             gameObject.SetActive(false);
         }
+
+        UIManager.Instance.ShowUI("OverlayUI");
+        UIManager.Instance.ShowUI("MainUI");
+        UIManager.Instance.ShowUI("PersistentUI");
     }
 
     public void OnEscClicked()

@@ -23,7 +23,8 @@ public class MainUIPanelController : MonoBehaviour
     private void OnLampHotspotClicked(GameObject go)
     {
         Debug.Log("点击了煤油灯热点，显示煤油灯界面");
-        UIManager.Instance.ShowFocusUI(FocusPanelType.Lamp);
+        AudioManager.Instance.PlaySFX(ESFXType.Click);
+        UIManager.Instance.ShowFocusUI(FocusPanelType.Lamp, lamp_hotspot.transform.position);
     }
 
     private void OnBedHotspotClicked(GameObject go)
@@ -34,19 +35,22 @@ public class MainUIPanelController : MonoBehaviour
             Debug.Log("已经获得了报纸，不显示床界面");
             return;
         }
-        UIManager.Instance.ShowFocusUI(FocusPanelType.Bed);
+        AudioManager.Instance.PlaySFX(ESFXType.Click);
+        UIManager.Instance.ShowFocusUI(FocusPanelType.Bed, bed_hotspot.transform.position);
     }
 
     private void OnDeskHotspotClicked(GameObject go)
     {
         Debug.Log("点击了书桌热点，显示书桌界面");
-        UIManager.Instance.ShowFocusUI(FocusPanelType.Desk);
+        AudioManager.Instance.PlaySFX(ESFXType.Click);
+        UIManager.Instance.ShowFocusUI(FocusPanelType.Desk, desk_hotspot.transform.position);
     }
 
     private void OnShelfHotspotClicked(GameObject go)
     {
         Debug.Log("点击了书架热点，显示书架界面");
-        UIManager.Instance.ShowFocusUI(FocusPanelType.Shelf);
+        AudioManager.Instance.PlaySFX(ESFXType.Click);
+        UIManager.Instance.ShowFocusUI(FocusPanelType.Shelf, shelf_hotspot.transform.position);
     }
 
 

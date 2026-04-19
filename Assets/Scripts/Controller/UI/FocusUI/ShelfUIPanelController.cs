@@ -8,24 +8,25 @@ public class ShelfUIPanelController : MonoBehaviour
     [SerializeField] private GameObject noteObject;
     [SerializeField] private TMP_Text clueText;
 
+    void Awake()
+    {
+        noteObject.SetActive(true);
+        clueText.gameObject.SetActive(false);
+    }
     void Start()
     {
-        if (GameManager.Instance.Model.GotItems.Contains(EItemType.Note))
+        MUIEventListener.Get(gameObject).onClick = _ =>
         {
-            //拿过笔记了后再次点开显示新线索
-            noteObject.SetActive(false);
-            clueText.gameObject.SetActive(true);
-        }
-        else
-        {
-            noteObject.SetActive(true);
-            clueText.gameObject.SetActive(false);
-        }
+            AudioManager.Instance.PlaySFX(ESFXType.Click);
+            UIManager.Instance.HideFocusUI();
+        };
 
         MUIEventListener.Get(noteObject).onClick = _ =>
         {
-            UIManager.Instance.HideFocusUI();
-            UIManager.Instance.GetItem(EItemType.Note);
+            UIManager.Instance.ShowFocusUI(FocusPanelType.Note);
+            AudioManager.Instance.PlaySFX(ESFXType.Click);
+            noteObject.SetActive(false);
+            clueText.gameObject.SetActive(true);
         };
     }
 }

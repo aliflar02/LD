@@ -1,6 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using DG.Tweening;
+using UnityEngine.UI;
 
 public enum FocusPanelType
 {
@@ -17,6 +19,7 @@ public enum FocusPanelType
 
 public class FocusUIPanelController : MonoBehaviour
 {
+    [SerializeField] private Image BgImage;
     [SerializeField] private GameObject lampPanel;
     [SerializeField] private GameObject bedPanel;
     [SerializeField] private GameObject deskPanel;
@@ -30,6 +33,14 @@ public class FocusUIPanelController : MonoBehaviour
     {
         HideAllPanels();
     }
+    void Start()
+    {
+        MUIEventListener.Get(BgImage.gameObject).onClick = _ =>
+        {
+            UIManager.Instance.HideFocusUI();
+            AudioManager.Instance.PlaySFX(ESFXType.Click);
+        };
+    }
     private void HideAllPanels()
     {
         lampPanel.SetActive(false);
@@ -42,42 +53,38 @@ public class FocusUIPanelController : MonoBehaviour
         certificatePanel.SetActive(false);
     }
 
-    public void ShowPanel(FocusPanelType panelType)
+    public void ShowPanel(FocusPanelType panelType, Vector3 startPos = default(Vector3))
     {
         gameObject.SetActive(true);
         HideAllPanels();
         GameManager.Instance.Model.CurrentFocusPanelType = panelType;
         Debug.Log($"显示聚焦界面: {panelType}");
-        switch (panelType)
+        var targetPanel = panelType switch
         {
-            case FocusPanelType.Lamp:
-                lampPanel.SetActive(true);
-                print("显示煤油灯界面");
-                break;
-            case FocusPanelType.Bed:
-                bedPanel.SetActive(true);
-                break;
-            case FocusPanelType.Desk:
-                deskPanel.SetActive(true);
-                break;
-            case FocusPanelType.Shelf:
-                shelfPanel.SetActive(true);
-                break;
-            case FocusPanelType.Password:
-                passwordPanel.SetActive(true);
-                break;
-            case FocusPanelType.BoxResult:
-                boxResultPanel.SetActive(true);
-                break;
-            case FocusPanelType.Note:
-                notePanel.SetActive(true);
-                break;
-            case FocusPanelType.Certificate:
-                //显示证明书界面
-                certificatePanel.SetActive(true);
-                break;
-            default:
-                break;
+            FocusPanelType.Lamp => lampPanel,
+            FocusPanelType.Bed => bedPanel,
+            FocusPanelType.Desk => deskPanel,
+            FocusPanelType.Shelf => shelfPanel,
+            FocusPanelType.Password => passwordPanel,
+            FocusPanelType.BoxResult => boxResultPanel,
+            FocusPanelType.Note => notePanel,
+            FocusPanelType.Certificate => certificatePanel,
+            _ => null
+        };
+        if (targetPanel != null)
+        {
+            targetPanel.SetActive(true);
+            if (startPos != default(Vector3))
+            {
+                targetPanel.transform.position = startPos;
+                targetPanel.transform.DOLocalMove(Vector3.zero, 0.3f);
+            }
+            else
+            {
+                targetPanel.transform.localPosition = Vector3.zero;
+            }
+            targetPanel.transform.DOScale(1f, 0.3f).From(0f).SetEase(Ease.OutBack);
         }
+        BgImage.DOFade(1f, 0.3f).From(0f);
     }
 }

@@ -1,11 +1,11 @@
-using System.Collections;
-using System.Collections.Generic;
+
 using DG.Tweening;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class CertificateUIPanelController : MonoBehaviour
 {
-    [SerializeField] private GameObject endGameScene;
+    [SerializeField] private Image endGameScene;
     [SerializeField] private GameObject blackBg;
     [SerializeField] private GameObject certificatePanel;
     [SerializeField] private GameObject endGamePanel;
@@ -13,33 +13,51 @@ public class CertificateUIPanelController : MonoBehaviour
     {
         certificatePanel.SetActive(false);
         endGamePanel.SetActive(false);
-        endGameScene.SetActive(false);
     }
     // Start is called before the first frame update
     void Start()
     {
+        endGameScene.gameObject.SetActive(false);
         MUIEventListener.Get(blackBg).onClick = _ =>
         {
             //点击黑背景，显示证明书界面
+            AudioManager.Instance.PlaySFX(ESFXType.Click);
             certificatePanel.SetActive(true);
         };
         MUIEventListener.Get(certificatePanel).onClick = _ =>
         {
             //点击证明书界面
             certificatePanel.SetActive(false);
-            Debug.Log("点击了证明书界面，黑屏，打开黑暗场景，打开对话，关闭对话后游戏结束");
-            endGameScene.SetActive(true);
+            AudioManager.Instance.PlaySFX(ESFXType.Click);
+            blackBg.SetActive(true);
+            UIManager.Instance.ShowDialoguePanel();
+            UIManager.Instance.PlaySequence("SEQ_08_LOOP_ENDING");
         };
-        MUIEventListener.Get(endGameScene).onClick = _ =>
+        MUIEventListener.Get(endGameScene.gameObject).onClick = _ =>
         {
-            endGameScene.SetActive(false);
+            AudioManager.Instance.PlaySFX(ESFXType.Click);
+            endGameScene.gameObject.SetActive(false);
             endGamePanel.SetActive(true);
         };
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-
+        MUIEventListener.Get(endGamePanel).onClick = _ =>
+        {
+            AudioManager.Instance.PlaySFX(ESFXType.Click);
+#if UNITY_EDITOR
+            UnityEditor.EditorApplication.isPlaying = false;
+#else
+            Application.Quit();
+#endif
+        };
+        UIManager.Instance.RegisterSequenceFinishedListener(sequenceId =>
+        {
+            if (sequenceId == "SEQ_08_LOOP_ENDING")
+            {
+                endGameScene.gameObject.SetActive(true);
+                endGameScene.DOFade(1f, 0.3f).From(0f).OnComplete(() =>
+                {
+                    blackBg.SetActive(false);
+                });
+            }
+        });
     }
 }

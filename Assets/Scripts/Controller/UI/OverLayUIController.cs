@@ -26,10 +26,11 @@ public class OverLayUIController : MonoBehaviour
 
     private void OnOverlayClicked(GameObject go)
     {
+        AudioManager.Instance.PlaySFX(ESFXType.Click);
         if (!hasClicked)
         {
             hasClicked = true;
-            Debug.Log("弹出人物立绘和对话框 “莱特博士让我来取文件，这里好黑…”");
+            UIManager.Instance.ShowDialoguePanel();
             // 点击后执行的逻辑，显示煤油灯图片
             redFlashImage.gameObject.SetActive(true);
             //显示出底部暗的环境
@@ -44,6 +45,7 @@ public class OverLayUIController : MonoBehaviour
     // 点击煤油灯
     private void OnRedFlashClicked(GameObject go)
     {
+        AudioManager.Instance.PlaySFX(ESFXType.Click);
         if (hasClicked)
         {
             Debug.Log("点击煤油灯，淡出遮罩，打开煤油灯界面");

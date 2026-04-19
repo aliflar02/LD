@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using DG.Tweening;
 using UnityEngine;
 
 public class DeskUIPanelController : MonoBehaviour
@@ -12,6 +13,7 @@ public class DeskUIPanelController : MonoBehaviour
     {
         MUIEventListener.Get(boxObject).onClick = _ =>
         {
+            AudioManager.Instance.PlaySFX(ESFXType.Click);
             if (GameManager.Instance.Model.GotItems.Contains(EItemType.Photo))
             {
                 Debug.Log("已经获得了照片，显示箱子结果界面");
@@ -25,6 +27,7 @@ public class DeskUIPanelController : MonoBehaviour
         };
         MUIEventListener.Get(gameObject).onClick = _ =>
         {
+            AudioManager.Instance.PlaySFX(ESFXType.Click);
             UIManager.Instance.HideFocusUI();
         };
 
@@ -37,5 +40,18 @@ public class DeskUIPanelController : MonoBehaviour
                 controller.Init(noteItemController.Value);
             }
         }
+
+        UIManager.Instance.RegisterSequenceFinishedListener(sequenceId =>
+        {
+            if (sequenceId == "SEQ_07_CLUE3_COMPLETE")
+            {
+                DOTween.Sequence().AppendInterval(0.5f).AppendCallback(() =>
+                {
+                    //画面扭曲
+                    UIManager.Instance.ShowFocusUI(FocusPanelType.Certificate);
+                    UIManager.Instance.HidePersistentUI();
+                });
+            }
+        });
     }
 }

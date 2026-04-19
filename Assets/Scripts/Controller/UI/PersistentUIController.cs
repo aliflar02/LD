@@ -22,14 +22,22 @@ public class PersistentUIController : MonoBehaviour
     [Obsolete]
     [SerializeField] private List<EItemType> gotItems = new();
     [SerializeField] private TMP_Text clickHintText;
+    private float inventoryPanelShownX;
+    private float inventoryPanelHiddenX;
+    private bool isInventoryPanelVisible = true;
+
     void Awake()
     {
         slotPrefab.gameObject.SetActive(false);
         clickHintText.gameObject.SetActive(false);
     }
+
     void Start()
     {
-
+        Canvas.ForceUpdateCanvases();
+        inventoryPanelShownX = inventoryPanel.anchoredPosition.x;
+        inventoryPanelHiddenX = inventoryPanelShownX + inventoryPanel.rect.width;
+        isInventoryPanelVisible = Mathf.Approximately(inventoryPanel.anchoredPosition.x, inventoryPanelShownX);
     }
 
     public void GetItem(EItemType itemType)
@@ -51,7 +59,9 @@ public class PersistentUIController : MonoBehaviour
             var slot = child.GetComponent<SlotController>();
             if (slot != null && slot.ItemType == itemType)
             {
-                Destroy(child.gameObject);
+                var rt = child.GetComponent<RectTransform>();
+                rt.DOScaleX(0f, 0.2f).From(1f).SetEase(Ease.InBack);
+                rt.DOSizeDelta(new Vector2(rt.sizeDelta.x, 0f), 0.32f).SetEase(Ease.InBack).OnComplete(() => Destroy(child.gameObject));
                 break;
             }
         }
@@ -65,4 +75,19 @@ public class PersistentUIController : MonoBehaviour
             .AppendInterval(1f)
             .AppendCallback(() => clickHintText.gameObject.SetActive(false));
     }
+
+    public void HideItemPanel()
+    {
+        inventoryPanel.DOKill();
+        inventoryPanel.DOAnchorPosX(inventoryPanelHiddenX, 0.5f).SetEase(Ease.OutCubic);
+        isInventoryPanelVisible = false;
+    }
+
+    public void ShowItemPanel()
+    {
+        inventoryPanel.DOKill();
+        inventoryPanel.DOAnchorPosX(inventoryPanelShownX, 0.5f).SetEase(Ease.OutBack);
+        isInventoryPanelVisible = true;
+    }
+
 }
