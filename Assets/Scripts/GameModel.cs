@@ -13,7 +13,7 @@ public class GameModel : ISingleton
 {
     public EItemType CurrentItemType { get; set; } = EItemType.None;
     public FocusPanelType CurrentFocusPanelType { get; set; } = FocusPanelType.None;
-    public BindableProperty<ELanguage> CurrentLanguage { get; } = new BindableProperty<ELanguage>(ELanguage.Chinese);
+    public BindableProperty<ELanguage> CurrentLanguage { get; } = new BindableProperty<ELanguage>(ELanguage.English);
 
     public List<EItemType> GotItems = new();
 
