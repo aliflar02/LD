@@ -8,6 +8,11 @@ public class BedUIPanelController : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        MUIEventListener.Get(gameObject).onClick = _ =>
+        {
+            AudioManager.Instance.PlaySFX(ESFXType.Click);
+            UIManager.Instance.HideFocusUI();
+        };
         MUIEventListener.Get(newspaperObject).onClick = _ =>
         {
             AudioManager.Instance.PlaySFX(ESFXType.Click);

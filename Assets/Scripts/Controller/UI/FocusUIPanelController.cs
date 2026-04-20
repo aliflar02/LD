@@ -53,7 +53,7 @@ public class FocusUIPanelController : MonoBehaviour
         certificatePanel.SetActive(false);
     }
 
-    public void ShowPanel(FocusPanelType panelType, Vector3 startPos = default(Vector3))
+    public void ShowPanel(FocusPanelType panelType, Vector3 startPos = default(Vector3), bool PopEffect = true)
     {
         gameObject.SetActive(true);
         HideAllPanels();
@@ -83,7 +83,14 @@ public class FocusUIPanelController : MonoBehaviour
             {
                 targetPanel.transform.localPosition = Vector3.zero;
             }
-            targetPanel.transform.DOScale(1f, 0.3f).From(0f).SetEase(Ease.OutBack);
+            if (PopEffect)
+            {
+                targetPanel.transform.DOScale(1f, 0.3f).From(0f).SetEase(Ease.OutBack);
+            }
+            else
+            {
+                targetPanel.transform.localScale = Vector3.one;
+            }
         }
         BgImage.DOFade(1f, 0.3f).From(0f);
     }

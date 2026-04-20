@@ -8,6 +8,12 @@ public class LampUIPanelController : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        MUIEventListener.Get(gameObject).onClick = _ =>
+        {
+            AudioManager.Instance.PlaySFX(ESFXType.Click);
+            UIManager.Instance.HideFocusUI();
+        };
+
         MUIEventListener.Get(lampObject).onClick = _ =>
         {
             AudioManager.Instance.PlaySFX(ESFXType.Click);

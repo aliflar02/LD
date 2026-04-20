@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using Framework.Core;
+using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -8,7 +9,7 @@ public interface IUIManager : ISingleton
 {
     void ShowUI(string uiName);
     void HideUI(string uiName);
-    void ShowFocusUI(FocusPanelType panelType, Vector3 startPos = default(Vector3));
+    void ShowFocusUI(FocusPanelType panelType, Vector3 startPos = default(Vector3), bool PopEffect = true);
     void HideFocusUI();//隐藏FocusUI使用这个，方便focusUI状态统一处理
     void HidePersistentUI();
     void ShowItemPanel();
@@ -40,7 +41,6 @@ public class UIManager : MonoSingleton<UIManager>, IUIManager
         {
             dialogueController.gameObject.SetActive(false);
         });
-
     }
 
     public void ShowUI(string uiName)
@@ -67,9 +67,9 @@ public class UIManager : MonoSingleton<UIManager>, IUIManager
         }
     }
 
-    public void ShowFocusUI(FocusPanelType panelType, Vector3 startPos = default(Vector3))
+    public void ShowFocusUI(FocusPanelType panelType, Vector3 startPos = default(Vector3), bool PopEffect = true)
     {
-        focusUIPanelController.ShowPanel(panelType, startPos);
+        focusUIPanelController.ShowPanel(panelType, startPos, PopEffect);
         if (panelType != FocusPanelType.Desk)
         {
             HideItemPanel();

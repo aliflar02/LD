@@ -6,6 +6,9 @@ using UnityEngine.UI;
 public class CertificateUIPanelController : MonoBehaviour
 {
     [SerializeField] private Image endGameScene;
+    [SerializeField] private GameObject endGameLightScene;
+    [SerializeField] private GameObject endGameSceneLight;
+
     [SerializeField] private GameObject blackBg;
     [SerializeField] private GameObject certificatePanel;
     [SerializeField] private GameObject endGamePanel;
@@ -13,6 +16,8 @@ public class CertificateUIPanelController : MonoBehaviour
     {
         certificatePanel.SetActive(false);
         endGamePanel.SetActive(false);
+        endGameLightScene.SetActive(false);
+        endGameSceneLight.SetActive(true);
     }
     // Start is called before the first frame update
     void Start()
@@ -33,10 +38,17 @@ public class CertificateUIPanelController : MonoBehaviour
             UIManager.Instance.ShowDialoguePanel();
             UIManager.Instance.PlaySequence("SEQ_08_LOOP_ENDING");
         };
-        MUIEventListener.Get(endGameScene.gameObject).onClick = _ =>
+        MUIEventListener.Get(endGameSceneLight.gameObject).onClick = _ =>
         {
             AudioManager.Instance.PlaySFX(ESFXType.Click);
-            endGameScene.gameObject.SetActive(false);
+            endGameLightScene.SetActive(true);
+            endGameSceneLight.SetActive(false);
+        };
+        MUIEventListener.Get(endGameLightScene).onClick = _ =>
+        {
+            AudioManager.Instance.PlaySFX(ESFXType.Click);
+            endGameLightScene.SetActive(false);
+            endGameSceneLight.SetActive(false);
             endGamePanel.SetActive(true);
         };
         MUIEventListener.Get(endGamePanel).onClick = _ =>

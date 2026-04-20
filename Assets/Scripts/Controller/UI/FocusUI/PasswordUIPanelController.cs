@@ -75,10 +75,10 @@ public class PasswordUIPanelController : MonoBehaviour
         {
             Debug.Log("密码正确！");
             RedMask.gameObject.SetActive(true);
-            RedMask.DOFade(1f, 0.8f).From(0f).SetEase(Ease.OutCubic).OnComplete(() =>
+            RedMask.DOFade(1f, 0.5f).From(0f).SetEase(Ease.OutCubic).OnComplete(() =>
             {
                 boxObject.SetActive(false);
-                RedMask.DOFade(0f, 0.3f).SetEase(Ease.InCubic).OnComplete(() =>
+                RedMask.DOFade(0f, 0.2f).SetEase(Ease.InCubic).OnComplete(() =>
                 {
                     UIManager.Instance.ShowFocusUI(FocusPanelType.BoxResult);
                 });
