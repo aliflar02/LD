@@ -165,13 +165,6 @@ public class DialogueController : MonoBehaviour
     {
         if (isShowingIntroNarration && isIntroNarrationTyping)
         {
-            if ((allowMouseClickAdvance && Input.GetMouseButtonDown(0)) ||
-                (allowSpaceAdvance && Input.GetKeyDown(KeyCode.Space)) ||
-                (allowEnterAdvance && (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter))))
-            {
-                advanceRequested = true;
-            }
-
             return;
         }
 
@@ -809,7 +802,6 @@ public class DialogueController : MonoBehaviour
         {
             if (isIntroNarrationTyping)
             {
-                advanceRequested = true;
                 return;
             }
 
