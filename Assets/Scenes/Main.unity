@@ -1820,7 +1820,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &210583642
 RectTransform:
   m_ObjectHideFlags: 0
@@ -6419,11 +6419,6 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: d9b581356f7e3b641a743338b8bc0f26, type: 3}
---- !u!224 &741180662 stripped
-RectTransform:
-  m_CorrespondingSourceObject: {fileID: 5535556110820823157, guid: d9b581356f7e3b641a743338b8bc0f26, type: 3}
-  m_PrefabInstance: {fileID: 741180661}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &789405098
 GameObject:
   m_ObjectHideFlags: 0
@@ -8309,6 +8304,11 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1012182861}
   m_CullTransparentMesh: 1
+--- !u!224 &1049457290 stripped
+RectTransform:
+  m_CorrespondingSourceObject: {fileID: 7219618609313891862, guid: d9b581356f7e3b641a743338b8bc0f26, type: 3}
+  m_PrefabInstance: {fileID: 741180661}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1055724546
 GameObject:
   m_ObjectHideFlags: 0
@@ -11805,7 +11805,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 28d7b84734ba53b47899378fdbb8e90b, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 4a1fc3f656bfc384799d73ff4303cdb9, type: 3}
   m_Type: 0
   m_PreserveAspect: 1
   m_FillCenter: 1
@@ -14469,7 +14469,7 @@ RectTransform:
   m_LocalScale: {x: 0, y: 0, z: 0}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 741180662}
+  - {fileID: 1049457290}
   - {fileID: 2041787927}
   - {fileID: 1059920923}
   - {fileID: 210583642}
@@ -16231,7 +16231,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &2047534864
 MonoBehaviour:
   m_ObjectHideFlags: 0
