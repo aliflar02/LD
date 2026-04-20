@@ -1,5 +1,6 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
+using Framework.Core;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
@@ -9,13 +10,21 @@ using UnityEngine.UI;
 public class DialogueController : MonoBehaviour
 {
     [Header("Data")]
-    [Tooltip("对白数据库（DialogueDatabase），提供 sequenceId 对应的对白序列。")]
-    [SerializeField] private DialogueDatabase database;
+    [Tooltip("中文对白数据库（CN DialogueDatabase）。")]
+    [FormerlySerializedAs("database")]
+    [SerializeField] private DialogueDatabase databaseCN;
+    [Tooltip("英文对白数据库（EN DialogueDatabase）。")]
+    [SerializeField] private DialogueDatabase databaseEN;
 
     [Header("Intro")]
     [TextArea(2, 6)]
-    [Tooltip("开场旁白文本（Intro Narration Text），默认显示在 NarrationRoot 上。")]
-    [SerializeField] private string introNarrationText = "你从黑暗中醒来，只记得一个模糊的声音告诉你，去你的意识深处，找到自己丢失的记忆……";
+    [Tooltip("开场旁白中文文本（Intro Narration Text CN），默认显示在 NarrationRoot 上。")]
+    [FormerlySerializedAs("introNarrationText")]
+    [SerializeField] private string introNarrationTextCN = "你从黑暗中醒来，只记得一个模糊的声音告诉你，去你的意识深处，找到自己丢失的记忆……";
+    [TextArea(2, 6)]
+    [Tooltip("开场旁白英文文本（Intro Narration Text EN）。")]
+    [SerializeField] private string introNarrationTextEN =
+        "You wake up in the dark. A faint voice tells you to descend into your mind and recover the memories you lost...";
     [Tooltip("点击开场旁白后要播放的首个对白序列（Intro Sequence Id）。")]
     [SerializeField] private string introSequenceId = "SEQ_01_INTRO_WAKE";
     [Min(0)]
@@ -82,6 +91,10 @@ public class DialogueController : MonoBehaviour
     private string currentSequenceId = string.Empty;
     private MUIEventListener dialogueRootListener;
     private MUIEventListener narrationRootListener;
+    private IUnRegister languageChangedUnregister;
+    private SystemLanguage currentLanguage = SystemLanguage.English;
+    private DialogueDatabase activeDatabase;
+    private string activeIntroNarrationText = string.Empty;
 
     public bool IsPlaying => isPlaying;
     public string CurrentSequenceId => currentSequenceId;
@@ -109,6 +122,7 @@ public class DialogueController : MonoBehaviour
     private void Awake()
     {
         if (dialogueUI == null) dialogueUI = gameObject;
+        ApplyLanguage(currentLanguage);
         ResolveMissingReferences();
         HookDialogueRootClick();
         HookNarrationRootClick();
@@ -121,6 +135,11 @@ public class DialogueController : MonoBehaviour
         {
             SetDialogueVisible(false);
         }
+    }
+
+    private void Start()
+    {
+        RegisterLanguageChangedListener();
     }
 
     private void OnEnable()
@@ -165,6 +184,8 @@ public class DialogueController : MonoBehaviour
     private void OnDestroy()
     {
         StopIntroNarrationTyping();
+        languageChangedUnregister?.UnRegisterEvent();
+        languageChangedUnregister = null;
         UnHookDialogueRootClick();
         UnHookNarrationRootClick();
     }
@@ -177,6 +198,7 @@ public class DialogueController : MonoBehaviour
 
     public bool PlaySequence(string sequenceId, int startLineIndex)
     {
+        var database = GetActiveDatabase();
         if (database == null)
         {
             Debug.LogError($"[{nameof(DialogueController)}] DialogueDatabase is not assigned.");
@@ -262,7 +284,6 @@ public class DialogueController : MonoBehaviour
         var firstLine = GetFirstValidLine(sequence, startLineIndex);
         if (firstLine != null)
         {
-            // 先应用首行可视状态，避免根节点激活时短暂显示错误界面。
             ApplyLineVisuals(firstLine);
             if (firstLine.ViewMode == DialogueLineViewMode.CenterBlackNarration && narrationRoot == null)
             {
@@ -551,7 +572,7 @@ public class DialogueController : MonoBehaviour
         }
 
         isIntroNarrationTyping = true;
-        var content = introNarrationText ?? string.Empty;
+        var content = activeIntroNarrationText ?? string.Empty;
         narrationText.text = content;
         narrationText.maxVisibleCharacters = 0;
         narrationText.ForceMeshUpdate();
@@ -620,7 +641,6 @@ public class DialogueController : MonoBehaviour
     {
         var root = dialogueUI != null ? dialogueUI.transform : transform;
 
-        // DialogueRoot 应绑定“标准对白模式根节点”，不应等于总根（DialogueUI）。
         if (dialogueRoot == dialogueUI)
         {
             dialogueRoot = null;
@@ -796,5 +816,71 @@ public class DialogueController : MonoBehaviour
         }
 
         RequestAdvance();
+    }
+
+    private void RegisterLanguageChangedListener()
+    {
+        if (languageChangedUnregister != null)
+        {
+            return;
+        }
+
+        languageChangedUnregister = EventBus.RegisterEvent<DialogueLanguageChangedEvent>(OnLanguageChanged);
+    }
+
+    private void OnLanguageChanged(DialogueLanguageChangedEvent evt)
+    {
+        currentLanguage = evt.Language;
+        ApplyLanguage(currentLanguage);
+    }
+
+    private void ApplyLanguage(SystemLanguage language)
+    {
+        activeDatabase = ResolveDatabase(language);
+        activeIntroNarrationText = ResolveIntroNarrationText(language);
+    }
+
+    private DialogueDatabase GetActiveDatabase()
+    {
+        if (activeDatabase == null)
+        {
+            activeDatabase = ResolveDatabase(currentLanguage);
+        }
+
+        return activeDatabase;
+    }
+
+    private DialogueDatabase ResolveDatabase(SystemLanguage language)
+    {
+        return language switch
+        {
+            SystemLanguage.English => databaseEN != null ? databaseEN : databaseCN,
+            SystemLanguage.Chinese => databaseCN != null ? databaseCN : databaseEN,
+            SystemLanguage.ChineseSimplified => databaseCN != null ? databaseCN : databaseEN,
+            SystemLanguage.ChineseTraditional => databaseCN != null ? databaseCN : databaseEN,
+            _ => databaseCN != null ? databaseCN : databaseEN
+        };
+    }
+
+    private string ResolveIntroNarrationText(SystemLanguage language)
+    {
+        return language switch
+        {
+            SystemLanguage.English => !string.IsNullOrWhiteSpace(introNarrationTextEN)
+                ? introNarrationTextEN
+                : introNarrationTextCN,
+            SystemLanguage.Chinese => !string.IsNullOrWhiteSpace(introNarrationTextCN)
+                ? introNarrationTextCN
+                : introNarrationTextEN,
+            SystemLanguage.ChineseSimplified => !string.IsNullOrWhiteSpace(introNarrationTextCN)
+                ? introNarrationTextCN
+                : introNarrationTextEN,
+            SystemLanguage.ChineseTraditional => !string.IsNullOrWhiteSpace(introNarrationTextCN)
+                ? introNarrationTextCN
+                : introNarrationTextEN,
+            _ => !string.IsNullOrWhiteSpace(introNarrationTextCN)
+                ? introNarrationTextCN
+                : introNarrationTextEN
+        };
     }
 }

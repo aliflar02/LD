@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: e876a38a609ca5b4d8c3fa6c7d692ed0, type: 3}
-  m_Name: MainDialogueDatabase
+  m_Name: MainDialogueDatabase_CN
   m_EditorClassIdentifier: 
   sequences:
   - sequenceId: SEQ_01_INTRO_WAKE

@@ -1,0 +1,152 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e876a38a609ca5b4d8c3fa6c7d692ed0, type: 3}
+  m_Name: MainDialogueDatabase_EN
+  m_EditorClassIdentifier: 
+  sequences:
+  - sequenceId: SEQ_01_INTRO_WAKE
+    description: "\u5F00\u5C40\u9ED1\u5C4F\u5BF9\u767D"
+    onSequenceStartSignal: 
+    onSequenceEndSignal: 
+    lines:
+    - lineId: s1_l1
+      viewMode: 0
+      speaker: "\u4F60"
+      content: It's so dark... The doctor said that my memory is here, and I can
+        go back when I find it.
+      portrait: {fileID: 21300000, guid: 066fc8bfa81b47248a95884c72b1b76c, type: 3}
+      hidePortraitWhenNull: 0
+      charIntervalOverride: -1
+      autoAdvanceDelay: -1
+      onLineStartSignal: 
+      onLineEndSignal: 
+  - sequenceId: SEQ_02_LAMP_ENTER
+    description: "\u70B9\u51FB\u7164\u6CB9\u706F\u540E\u8FC7\u6E21"
+    onSequenceStartSignal: 
+    onSequenceEndSignal: 
+    lines:
+    - lineId: s2_l1
+      viewMode: 0
+      speaker: "\u4F60"
+      content: Please turn on this light first and see what is hidden here.
+      portrait: {fileID: 21300000, guid: 066fc8bfa81b47248a95884c72b1b76c, type: 3}
+      hidePortraitWhenNull: 0
+      charIntervalOverride: -1
+      autoAdvanceDelay: -1
+      onLineStartSignal: 
+      onLineEndSignal: 
+  - sequenceId: SEQ_03_NEWSPAPER_READ
+    description: "\u62A5\u7EB8\u4FE1\u606F"
+    onSequenceStartSignal: 
+    onSequenceEndSignal: 
+    lines:
+    - lineId: s3_l1
+      viewMode: 0
+      speaker: "\u4F60"
+      content: The famous psychologist Wright Reid has made a new understanding of
+        the subconscious dynamics of human beings... ''By tracing the historical
+        thread of psychological development, it helps individuals to realize that
+        current behavior is an adaptive product of past experience...''
+      portrait: {fileID: 21300000, guid: 066fc8bfa81b47248a95884c72b1b76c, type: 3}
+      hidePortraitWhenNull: 0
+      charIntervalOverride: -1
+      autoAdvanceDelay: -1
+      onLineStartSignal: 
+      onLineEndSignal: 
+    - lineId: s3_l2
+      viewMode: 0
+      speaker: "\u4F60"
+      content: This is also my memory? Something to do with the doctor's experiment?
+      portrait: {fileID: 21300000, guid: 066fc8bfa81b47248a95884c72b1b76c, type: 3}
+      hidePortraitWhenNull: 0
+      charIntervalOverride: -1
+      autoAdvanceDelay: -1
+      onLineStartSignal: 
+      onLineEndSignal: 
+  - sequenceId: SEQ_04_DESK_NOTEBOOK_HINT
+    description: "\u7B14\u8BB0\u672C\u5165\u683C\u63D0\u793A"
+    onSequenceStartSignal: 
+    onSequenceEndSignal: 
+    lines:
+    - lineId: s4_l1
+      viewMode: 0
+      speaker: "\u4F60"
+      content: This book... It seems to hold what I found, and when I gather it,
+        I may wake up.
+      portrait: {fileID: 21300000, guid: 066fc8bfa81b47248a95884c72b1b76c, type: 3}
+      hidePortraitWhenNull: 0
+      charIntervalOverride: -1
+      autoAdvanceDelay: -1
+      onLineStartSignal: 
+      onLineEndSignal: 
+  - sequenceId: SEQ_05_SHELF_NOTE_FOUND
+    description: "\u4E66\u67B6\u7EB8\u6761"
+    onSequenceStartSignal: 
+    onSequenceEndSignal: 
+    lines:
+    - lineId: s5_l1
+      viewMode: 0
+      speaker: "\u4F60"
+      content: The note says... 18 Zhongguancun East Road? Isn't this the address
+        of the institute? How can I remember so clearly?
+      portrait: {fileID: 21300000, guid: 066fc8bfa81b47248a95884c72b1b76c, type: 3}
+      hidePortraitWhenNull: 0
+      charIntervalOverride: -1
+      autoAdvanceDelay: -1
+      onLineStartSignal: 
+      onLineEndSignal: 
+  - sequenceId: SEQ_06_CERT_FOUND
+    description: "\u70B9\u7BB1\u5185\u9053\u5177\u540E\u7684\u5BF9\u767D"
+    onSequenceStartSignal: 
+    onSequenceEndSignal: 
+    lines:
+    - lineId: s6_l1
+      viewMode: 0
+      speaker: "\u4F60"
+      content: This is the proof that I volunteered to participate in subconscious
+        research...
+      portrait: {fileID: 21300000, guid: 066fc8bfa81b47248a95884c72b1b76c, type: 3}
+      hidePortraitWhenNull: 0
+      charIntervalOverride: -1
+      autoAdvanceDelay: -1
+      onLineStartSignal: 
+      onLineEndSignal: 
+  - sequenceId: SEQ_07_CLUE3_COMPLETE
+    description: "clue3 \u5165\u683C\u5B8C\u6210\u540E\u89E6\u53D1"
+    onSequenceStartSignal: 
+    onSequenceEndSignal: 
+    lines:
+    - lineId: s7_l1
+      viewMode: 0
+      speaker: "\u4F60"
+      content: Is that it? But why did I...
+      portrait: {fileID: 21300000, guid: 066fc8bfa81b47248a95884c72b1b76c, type: 3}
+      hidePortraitWhenNull: 0
+      charIntervalOverride: -1
+      autoAdvanceDelay: -1
+      onLineStartSignal: 
+      onLineEndSignal: 
+  - sequenceId: SEQ_08_LOOP_ENDING
+    description: "\u7ED3\u5C40\u9ED1\u573A\u4E00\u51FA\u73B0\u5C31\u81EA\u52A8\u8BF4"
+    onSequenceStartSignal: 
+    onSequenceEndSignal: 
+    lines:
+    - lineId: s8_l1
+      viewMode: 0
+      speaker: "\u4F60"
+      content: 'It''s so dark here... Gee, that''s so familiar. '
+      portrait: {fileID: 21300000, guid: 066fc8bfa81b47248a95884c72b1b76c, type: 3}
+      hidePortraitWhenNull: 0
+      charIntervalOverride: -1
+      autoAdvanceDelay: -1
+      onLineStartSignal: 
+      onLineEndSignal: 

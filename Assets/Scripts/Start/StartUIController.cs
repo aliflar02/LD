@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+using Framework.Core;
+using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
 
@@ -9,6 +10,10 @@ public class StartUIController : MonoBehaviour
     [SerializeField] private Button btnStart;
     [Tooltip("退出按钮（Btn_Esc）。")]
     [SerializeField] private Button btnEsc;
+    [Tooltip("中文按钮。")]
+    [SerializeField] private Button chineseButton;
+    [Tooltip("英文按钮。")]
+    [SerializeField] private Button englishButton;
 
     [Header("显示与输入")]
     [Tooltip("点击开始后隐藏 StartUI。")]
@@ -25,17 +30,33 @@ public class StartUIController : MonoBehaviour
     public UnityEvent onStartRequested = new();
 
     private bool hasStarted;
+    private IUnRegister languageChangedUnregister;
 
     private void OnEnable()
     {
         if (btnStart != null) btnStart.onClick.AddListener(OnStartClicked);
         if (btnEsc != null) btnEsc.onClick.AddListener(OnEscClicked);
+        if (chineseButton != null) chineseButton.onClick.AddListener(OnChineseClicked);
+        if (englishButton != null) englishButton.onClick.AddListener(OnEnglishClicked);
     }
 
     private void OnDisable()
     {
         if (btnStart != null) btnStart.onClick.RemoveListener(OnStartClicked);
         if (btnEsc != null) btnEsc.onClick.RemoveListener(OnEscClicked);
+        if (chineseButton != null) chineseButton.onClick.RemoveListener(OnChineseClicked);
+        if (englishButton != null) englishButton.onClick.RemoveListener(OnEnglishClicked);
+    }
+
+    private void Start()
+    {
+        languageChangedUnregister = GameManager.Instance.Model.CurrentLanguage.RegisterWithInitValue(UpdateLanguageButtonState);
+    }
+
+    private void OnDestroy()
+    {
+        languageChangedUnregister?.UnRegisterEvent();
+        languageChangedUnregister = null;
     }
 
     private void Update()
@@ -77,6 +98,40 @@ public class StartUIController : MonoBehaviour
     public void OnEscClicked()
     {
         QuitGame();
+    }
+
+    public void OnChineseClicked()
+    {
+        SwitchLanguage(ELanguage.Chinese, SystemLanguage.ChineseSimplified);
+    }
+
+    public void OnEnglishClicked()
+    {
+        SwitchLanguage(ELanguage.English, SystemLanguage.English);
+    }
+
+    private void SwitchLanguage(ELanguage targetLanguage, SystemLanguage systemLanguage)
+    {
+        if (GameManager.Instance.Model.CurrentLanguage.Value == targetLanguage)
+        {
+            return;
+        }
+
+        GameManager.Instance.Model.CurrentLanguage.Value = targetLanguage;
+        EventBus.TriggerEvent(new DialogueLanguageChangedEvent(systemLanguage));
+    }
+
+    private void UpdateLanguageButtonState(ELanguage currentLanguage)
+    {
+        if (chineseButton != null)
+        {
+            chineseButton.interactable = currentLanguage != ELanguage.Chinese;
+        }
+
+        if (englishButton != null)
+        {
+            englishButton.interactable = currentLanguage != ELanguage.English;
+        }
     }
 
     private void QuitGame()
