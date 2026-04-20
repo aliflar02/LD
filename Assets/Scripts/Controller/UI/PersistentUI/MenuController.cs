@@ -1,12 +1,15 @@
 using UnityEngine;
 using UnityEngine.UI;
 using DG.Tweening;
+using TMPro;
+using Framework.Core;
 
 
 public class MenuController : MonoBehaviour
 {
     [SerializeField] private Button btnOpenMenu;
     [SerializeField] private GameObject menuPanel;
+    [SerializeField] private TMP_Text menuText;
     [SerializeField] private Button btnYes;
     [SerializeField] private Button btnNo;
     [SerializeField] private bool isMenuOpen = false;
@@ -15,18 +18,21 @@ public class MenuController : MonoBehaviour
     [SerializeField] private float openStartScale = 0.8f;
 
     private RectTransform menuPanelRect;
-    private Vector2 menuTargetAnchoredPosition;
+    private RectTransform btnOpenMenuRect;
+    private Vector3 menuTargetWorldPosition;
     private Tween menuTween;
 
     private void Awake()
     {
         menuPanelRect = menuPanel.GetComponent<RectTransform>();
-        menuTargetAnchoredPosition = menuPanelRect.anchoredPosition;
+        btnOpenMenuRect = btnOpenMenu != null ? btnOpenMenu.GetComponent<RectTransform>() : null;
+        menuTargetWorldPosition = menuPanelRect.position;
     }
 
     // Start is called before the first frame update
     void Start()
     {
+        menuTargetWorldPosition = menuPanelRect.position;
         menuPanel.SetActive(false);
         btnOpenMenu.onClick.AddListener(() =>
         {
@@ -37,13 +43,15 @@ public class MenuController : MonoBehaviour
             isMenuOpen = true;
             menuTween?.Kill();
             menuPanel.SetActive(true);
-            menuPanelRect.anchoredPosition = Vector2.zero;
+            Vector3 buttonWorldPosition = GetOpenButtonWorldPosition();
+            menuPanelRect.position = new Vector3(buttonWorldPosition.x, menuTargetWorldPosition.y, menuTargetWorldPosition.z);
             menuPanel.transform.localScale = Vector3.one * openStartScale;
 
             menuTween = DOTween.Sequence()
-                .Append(menuPanelRect.DOAnchorPos(menuTargetAnchoredPosition, openDuration).SetEase(Ease.OutCubic))
+                .Append(menuPanelRect.DOMoveX(menuTargetWorldPosition.x, openDuration).SetEase(Ease.OutCubic))
                 .Join(menuPanel.transform.DOScale(1f, openDuration).SetEase(Ease.OutBack));
         });
+
         btnYes.onClick.AddListener(() =>
         {
             Debug.Log("Yes");
@@ -59,8 +67,9 @@ public class MenuController : MonoBehaviour
             Debug.Log("No");
             AudioManager.Instance.PlaySFX(ESFXType.Click);
             menuTween?.Kill();
+            Vector3 buttonWorldPosition = GetOpenButtonWorldPosition();
             menuTween = DOTween.Sequence()
-                .Append(menuPanelRect.DOAnchorPos(Vector2.zero, closeDuration).SetEase(Ease.InCubic))
+                .Append(menuPanelRect.DOMoveX(buttonWorldPosition.x, closeDuration).SetEase(Ease.InCubic))
                 .Join(menuPanel.transform.DOScale(openStartScale, closeDuration).SetEase(Ease.InBack))
                 .OnComplete(() =>
                 {
@@ -68,6 +77,28 @@ public class MenuController : MonoBehaviour
                     isMenuOpen = false;
                 });
         });
+
+        GameManager.Instance.Model.CurrentLanguage.RegisterWithInitValue(value =>
+        {
+            switch (value)
+            {
+                case ELanguage.English:
+                    menuText.text = "Exit";
+                    break;
+                case ELanguage.Chinese:
+                    menuText.text = "退出游戏";
+                    break;
+            }
+        }).UnRegisterWhenGameObjectDestroyed(gameObject);
     }
 
+    private Vector3 GetOpenButtonWorldPosition()
+    {
+        if (btnOpenMenuRect != null)
+        {
+            return btnOpenMenuRect.position;
+        }
+
+        return btnOpenMenu != null ? btnOpenMenu.transform.position : menuTargetWorldPosition;
+    }
 }

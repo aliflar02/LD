@@ -1,5 +1,6 @@
 
 using DG.Tweening;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -11,10 +12,12 @@ public class CertificateUIPanelController : MonoBehaviour
 
     [SerializeField] private GameObject blackBg;
     [SerializeField] private GameObject certificatePanel;
+    [SerializeField] private GameObject certificatePanel1;
     [SerializeField] private GameObject endGamePanel;
     void Awake()
     {
         certificatePanel.SetActive(false);
+        certificatePanel1.SetActive(false);
         endGamePanel.SetActive(false);
         endGameLightScene.SetActive(false);
         endGameSceneLight.SetActive(true);
@@ -31,8 +34,13 @@ public class CertificateUIPanelController : MonoBehaviour
         };
         MUIEventListener.Get(certificatePanel).onClick = _ =>
         {
-            //点击证明书界面
             certificatePanel.SetActive(false);
+            certificatePanel1.SetActive(true);
+        };
+        MUIEventListener.Get(certificatePanel1).onClick = _ =>
+        {
+            //点击证明书界面
+            certificatePanel1.SetActive(false);
             AudioManager.Instance.PlaySFX(ESFXType.Click);
             blackBg.SetActive(true);
             UIManager.Instance.ShowDialoguePanel();
@@ -40,7 +48,7 @@ public class CertificateUIPanelController : MonoBehaviour
         };
         MUIEventListener.Get(endGameSceneLight.gameObject).onClick = _ =>
         {
-            AudioManager.Instance.PlaySFX(ESFXType.Click);
+            AudioManager.Instance.PlaySFX(ESFXType.TrunLight);
             endGameLightScene.SetActive(true);
             endGameSceneLight.SetActive(false);
         };

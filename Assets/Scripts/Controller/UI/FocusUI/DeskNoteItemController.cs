@@ -3,10 +3,13 @@ using System.Collections.Generic;
 using DG.Tweening;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class DeskNoteItemController : MonoBehaviour
 {
     [SerializeField] private TMP_Text text;
+    [SerializeField] private Image image;
+    [SerializeField] private List<Sprite> itemSprites;
 
     // Start is called before the first frame update
     void Start()
@@ -69,19 +72,20 @@ public class DeskNoteItemController : MonoBehaviour
         switch (itemType)
         {
             case EItemType.Lamp:
-                text.text = "Lamp";
+                image.sprite = itemSprites[0];
                 break;
             case EItemType.NewsPaper:
-                text.text = "Newspaper";
+                image.sprite = itemSprites[1];
                 break;
             case EItemType.Note:
-                text.text = "Note";
+                image.sprite = itemSprites[2];
                 break;
             case EItemType.Photo:
-                text.text = "Photo";
+                image.sprite = itemSprites[3];
                 break;
             default:
                 break;
         }
+        image.DOFade(1f, 0.5f).From(0f).SetEase(Ease.OutCubic);
     }
 }

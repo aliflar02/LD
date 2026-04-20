@@ -1,16 +1,27 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using DG.Tweening;
 using Framework.Core;
 using UnityEngine;
 public enum ESFXType
 {
     None,
     Click,
+    Password,
+    TrunLight,
+    RedLight,
+}
+public enum EBGMType
+{
+    None,
+    Start,
+    Main,
+    End,
 }
 public interface IAudioManager : ISingleton
 {
-    void PlayBGM(string musicName = "");
+    void PlayBGM(EBGMType bgmType = EBGMType.None);
     void StopBGM();
     void PlaySFX(ESFXType fxType);
 }
@@ -19,7 +30,8 @@ public class AudioManager : MonoSingleton<AudioManager>, IAudioManager
 {
     [SerializeField] private AudioSource musicSource;
     [SerializeField] private AudioSource fxSource;
-    [SerializeField] private AudioClip clickClip;
+    [SerializeField] private List<AudioClip> musicClips;
+    [SerializeField] private List<AudioClip> sfxClips;
 
 
     public void OnSingletonInit()
@@ -42,17 +54,47 @@ public class AudioManager : MonoSingleton<AudioManager>, IAudioManager
         switch (fxType)
         {
             case ESFXType.Click:
-                fxSource.PlayOneShot(clickClip);
+                fxSource.PlayOneShot(sfxClips[0]);
+                break;
+            case ESFXType.Password:
+                fxSource.PlayOneShot(sfxClips[1]);
+                break;
+            case ESFXType.TrunLight:
+                fxSource.PlayOneShot(sfxClips[2]);
+                break;
+            case ESFXType.RedLight:
+                fxSource.PlayOneShot(sfxClips[3]);
                 break;
             default:
                 break;
         }
     }
 
-    public void PlayBGM(string musicName = "")
+    public void PlayBGM(EBGMType bgmType = EBGMType.None)
     {
-        musicSource.Play();
-        Debug.Log($"PlayBGM: {musicName}");
+        AudioClip clipToPlay = bgmType switch
+        {
+            EBGMType.Start => musicClips[0],
+            EBGMType.Main => musicClips[1],
+            EBGMType.End => musicClips[2],
+            _ => null
+        };
+        if (!musicSource.isPlaying)
+        {
+            musicSource.clip = clipToPlay;
+            musicSource.Play();
+            return;
+        }
+        musicSource.DOFade(0f, 1f).OnComplete(() =>
+        {
+
+            if (clipToPlay != null)
+            {
+                musicSource.clip = clipToPlay;
+                musicSource.Play();
+                musicSource.volume = 1f;
+            }
+        });
     }
 
     public void StopBGM()

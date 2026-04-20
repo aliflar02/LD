@@ -1,4 +1,6 @@
+using DG.Tweening;
 using Framework.Core;
+using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
@@ -30,7 +32,6 @@ public class StartUIController : MonoBehaviour
     public UnityEvent onStartRequested = new();
 
     private bool hasStarted;
-    private IUnRegister languageChangedUnregister;
 
     private void OnEnable()
     {
@@ -50,14 +51,11 @@ public class StartUIController : MonoBehaviour
 
     private void Start()
     {
-        languageChangedUnregister = GameManager.Instance.Model.CurrentLanguage.RegisterWithInitValue(UpdateLanguageButtonState);
+        GameManager.Instance.Model.CurrentLanguage
+            .RegisterWithInitValue(UpdateLanguageButtonState)
+            .UnRegisterWhenGameObjectDestroyed(gameObject);
     }
 
-    private void OnDestroy()
-    {
-        languageChangedUnregister?.UnRegisterEvent();
-        languageChangedUnregister = null;
-    }
 
     private void Update()
     {
@@ -93,6 +91,7 @@ public class StartUIController : MonoBehaviour
         UIManager.Instance.ShowUI("OverlayUI");
         UIManager.Instance.ShowUI("MainUI");
         UIManager.Instance.ShowUI("PersistentUI");
+        AudioManager.Instance.PlayBGM(EBGMType.Start);
     }
 
     public void OnEscClicked()
@@ -112,6 +111,10 @@ public class StartUIController : MonoBehaviour
 
     private void SwitchLanguage(ELanguage targetLanguage)
     {
+        Debug.Log(GameManager.Instance);
+        Debug.Log(GameManager.Instance.Model);
+        Debug.Log(GameManager.Instance.Model.CurrentLanguage);
+        Debug.Log($"Current Language: {GameManager.Instance.Model.CurrentLanguage.Value}, Target Language: {targetLanguage}");
         if (GameManager.Instance.Model.CurrentLanguage.Value == targetLanguage)
         {
             return;
@@ -124,12 +127,12 @@ public class StartUIController : MonoBehaviour
     {
         if (chineseButton != null)
         {
-            chineseButton.interactable = currentLanguage != ELanguage.Chinese;
+            chineseButton.GetComponent<Image>().DOFade(currentLanguage == ELanguage.English ? 0.6f : 1f, 0.2f);
         }
 
         if (englishButton != null)
         {
-            englishButton.interactable = currentLanguage != ELanguage.English;
+            englishButton.GetComponent<Image>().DOFade(currentLanguage == ELanguage.Chinese ? 0.6f : 1f, 0.2f);
         }
     }
 

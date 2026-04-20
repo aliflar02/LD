@@ -23,7 +23,8 @@ public class DialogueController : MonoBehaviour
     [SerializeField] private string introNarrationTextCN = "你从黑暗中醒来，只记得一个模糊的声音告诉你，去你的意识深处，找到自己丢失的记忆……";
     [TextArea(2, 6)]
     [Tooltip("开场旁白英文文本（Intro Narration Text EN）。")]
-    [SerializeField] private string introNarrationTextEN =
+    [SerializeField]
+    private string introNarrationTextEN =
         "You wake up in the dark. A faint voice tells you to descend into your mind and recover the memories you lost...";
     [Tooltip("点击开场旁白后要播放的首个对白序列（Intro Sequence Id）。")]
     [SerializeField] private string introSequenceId = "SEQ_01_INTRO_WAKE";
@@ -91,7 +92,6 @@ public class DialogueController : MonoBehaviour
     private string currentSequenceId = string.Empty;
     private MUIEventListener dialogueRootListener;
     private MUIEventListener narrationRootListener;
-    private IUnRegister languageChangedUnregister;
     private ELanguage currentLanguage = ELanguage.English;
     private DialogueDatabase activeDatabase;
     private string activeIntroNarrationText = string.Empty;
@@ -122,12 +122,16 @@ public class DialogueController : MonoBehaviour
     private void Awake()
     {
         if (dialogueUI == null) dialogueUI = gameObject;
-        if (GameManager.Instance != null)
-        {
-            currentLanguage = GameManager.Instance.Model.CurrentLanguage.Value;
-        }
 
-        ApplyLanguage(currentLanguage);
+    }
+
+    private void Start()
+    {
+        GameManager.Instance.Model.CurrentLanguage
+            .RegisterWithInitValue(OnLanguageChanged)
+            .UnRegisterWhenGameObjectDestroyed(gameObject);
+
+
         ResolveMissingReferences();
         HookDialogueRootClick();
         HookNarrationRootClick();
@@ -140,11 +144,6 @@ public class DialogueController : MonoBehaviour
         {
             SetDialogueVisible(false);
         }
-    }
-
-    private void Start()
-    {
-        RegisterLanguageChangedListener();
     }
 
     private void OnEnable()
@@ -189,8 +188,6 @@ public class DialogueController : MonoBehaviour
     private void OnDestroy()
     {
         StopIntroNarrationTyping();
-        languageChangedUnregister?.UnRegisterEvent();
-        languageChangedUnregister = null;
         UnHookDialogueRootClick();
         UnHookNarrationRootClick();
     }
@@ -823,15 +820,6 @@ public class DialogueController : MonoBehaviour
         RequestAdvance();
     }
 
-    private void RegisterLanguageChangedListener()
-    {
-        if (languageChangedUnregister != null)
-        {
-            return;
-        }
-
-        languageChangedUnregister = GameManager.Instance.Model.CurrentLanguage.RegisterWithInitValue(OnLanguageChanged);
-    }
 
     private void OnLanguageChanged(ELanguage language)
     {

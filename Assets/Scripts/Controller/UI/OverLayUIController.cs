@@ -17,7 +17,6 @@ public class OverLayUIController : MonoBehaviour
         // 初始化
         blackFadeImage.gameObject.SetActive(true);
         redFlashImage.gameObject.SetActive(false);
-        AudioManager.Instance.PlayBGM();
 
         // 监听事件
         MUIEventListener.Get(blackFadeImage.gameObject).onClick = OnOverlayClicked;
@@ -27,10 +26,12 @@ public class OverLayUIController : MonoBehaviour
     private void OnOverlayClicked(GameObject go)
     {
         AudioManager.Instance.PlaySFX(ESFXType.Click);
+        AudioManager.Instance.PlayBGM(EBGMType.Main);
         if (!hasClicked)
         {
             hasClicked = true;
             UIManager.Instance.ShowDialoguePanel();
+
             // 点击后执行的逻辑，显示煤油灯图片
             redFlashImage.gameObject.SetActive(true);
             //显示出底部暗的环境
@@ -45,7 +46,7 @@ public class OverLayUIController : MonoBehaviour
     // 点击煤油灯
     private void OnRedFlashClicked(GameObject go)
     {
-        AudioManager.Instance.PlaySFX(ESFXType.Click);
+        AudioManager.Instance.PlaySFX(ESFXType.TrunLight);
         if (hasClicked)
         {
             Debug.Log("点击煤油灯，淡出遮罩，打开煤油灯界面");

@@ -60,8 +60,8 @@ public class PersistentUIController : MonoBehaviour
             if (slot != null && slot.ItemType == itemType)
             {
                 var rt = child.GetComponent<RectTransform>();
-                rt.DOScaleX(0f, 0.2f).From(1f).SetEase(Ease.InBack);
-                rt.DOSizeDelta(new Vector2(rt.sizeDelta.x, 0f), 0.32f).SetEase(Ease.InBack).OnComplete(() => Destroy(child.gameObject));
+                // rt.DOScaleX(0f, 0.2f).From(1f).SetEase(Ease.InBack);
+                rt.DOSizeDelta(new Vector2(rt.sizeDelta.x, 0f), 0.3f).SetEase(Ease.InCubic).OnComplete(() => Destroy(child.gameObject));
                 break;
             }
         }

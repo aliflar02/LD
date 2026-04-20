@@ -38,7 +38,7 @@ public class PasswordUIPanelController : MonoBehaviour
             MUIEventListener.Get(btnList[i]).onClick = _ =>
             {
                 _.transform.DOPunchScale(Vector3.one * -0.1f, 0.2f, 1).SetEase(Ease.OutCubic);
-                AudioManager.Instance.PlaySFX(ESFXType.Click);
+                AudioManager.Instance.PlaySFX(ESFXType.Password);
                 OnLetterButtonClicked(index);
             };
         }
@@ -74,6 +74,8 @@ public class PasswordUIPanelController : MonoBehaviour
         if (enteredPassword.Equals(correctPassword, StringComparison.OrdinalIgnoreCase))
         {
             Debug.Log("密码正确！");
+            AudioManager.Instance.PlaySFX(ESFXType.RedLight);
+            AudioManager.Instance.PlayBGM(EBGMType.End);
             RedMask.gameObject.SetActive(true);
             RedMask.DOFade(1f, 0.5f).From(0f).SetEase(Ease.OutCubic).OnComplete(() =>
             {

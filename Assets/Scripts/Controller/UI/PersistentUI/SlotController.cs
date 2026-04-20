@@ -10,6 +10,8 @@ public class SlotController : MonoBehaviour
 {
     [SerializeField] private TMP_Text text;
     public EItemType ItemType = EItemType.None;
+    [SerializeField] private Image icon;
+    [SerializeField] private List<Sprite> itemSprites;
     void Start()
     {
         MUIEventListener.Get(gameObject).onSelect = _ =>
@@ -38,16 +40,16 @@ public class SlotController : MonoBehaviour
         switch (itemType)
         {
             case EItemType.Lamp:
-                text.text = "Lamp";
+                icon.sprite = itemSprites[0];
                 break;
             case EItemType.NewsPaper:
-                text.text = "Newspaper";
+                icon.sprite = itemSprites[1];
                 break;
             case EItemType.Note:
-                text.text = "Note";
+                icon.sprite = itemSprites[2];
                 break;
             case EItemType.Photo:
-                text.text = "Photo";
+                icon.sprite = itemSprites[3];
                 break;
             default:
                 break;
