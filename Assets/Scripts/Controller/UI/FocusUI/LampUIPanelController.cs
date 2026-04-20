@@ -18,7 +18,7 @@ public class LampUIPanelController : MonoBehaviour
         {
             AudioManager.Instance.PlaySFX(ESFXType.Click);
             UIManager.Instance.HideFocusUI();
-            UIManager.Instance.GetItem(EItemType.Lamp);
+            // UIManager.Instance.GetItem(EItemType.Lamp);
         };
     }
 }

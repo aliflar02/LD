@@ -42,6 +42,13 @@ public class PasswordUIPanelController : MonoBehaviour
                 OnLetterButtonClicked(index);
             };
         }
+        MUIEventListener.Get(RedMask.gameObject).onClick = _ =>
+        {
+            RedMask.DOFade(0f, 0.2f).SetEase(Ease.InCubic).OnComplete(() =>
+            {
+                UIManager.Instance.ShowFocusUI(FocusPanelType.BoxResult);
+            });
+        };
     }
 
     private void OnLetterButtonClicked(int letterIndex)
@@ -80,10 +87,6 @@ public class PasswordUIPanelController : MonoBehaviour
             RedMask.DOFade(1f, 0.5f).From(0f).SetEase(Ease.OutCubic).OnComplete(() =>
             {
                 boxObject.SetActive(false);
-                RedMask.DOFade(0f, 0.2f).SetEase(Ease.InCubic).OnComplete(() =>
-                {
-                    UIManager.Instance.ShowFocusUI(FocusPanelType.BoxResult);
-                });
             });
         }
         else

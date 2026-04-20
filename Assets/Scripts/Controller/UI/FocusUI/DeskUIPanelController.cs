@@ -48,7 +48,7 @@ public class DeskUIPanelController : MonoBehaviour
                 DOTween.Sequence().AppendInterval(0.5f).AppendCallback(() =>
                 {
                     //画面扭曲
-                    UIManager.Instance.ShowFocusUI(FocusPanelType.Certificate);
+                    UIManager.Instance.ShowFocusUI(FocusPanelType.Certificate, PopEffect: false);
                     UIManager.Instance.HidePersistentUI();
                 });
             }

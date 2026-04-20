@@ -6,12 +6,12 @@ using UnityEngine;
 public class ShelfUIPanelController : MonoBehaviour
 {
     [SerializeField] private GameObject noteObject;
-    [SerializeField] private TMP_Text clueText;
+    [SerializeField] private GameObject shelfWithClue;
 
     void Awake()
     {
         noteObject.SetActive(true);
-        clueText.gameObject.SetActive(false);
+        shelfWithClue.SetActive(false);
     }
     void Start()
     {
@@ -26,7 +26,7 @@ public class ShelfUIPanelController : MonoBehaviour
             UIManager.Instance.ShowFocusUI(FocusPanelType.Note);
             AudioManager.Instance.PlaySFX(ESFXType.Click);
             noteObject.SetActive(false);
-            clueText.gameObject.SetActive(true);
+            shelfWithClue.SetActive(true);
         };
     }
 }

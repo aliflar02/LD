@@ -10,6 +10,9 @@ public class MainUIPanelController : MonoBehaviour
     [SerializeField] private GameObject rightArrow;
     [SerializeField] private float sceneMoveSpeed = 800f;
     [SerializeField] private GameObject lamp_hotspot;
+    [SerializeField] private GameObject lamp_hotspot_light;
+    [SerializeField] private GameObject unLightScene;
+    [SerializeField] private bool isLightScene = true;
     [SerializeField] private GameObject bed_hotspot;
     [SerializeField] private GameObject desk_hotspot;
     [SerializeField] private GameObject shelf_hotspot;
@@ -21,6 +24,11 @@ public class MainUIPanelController : MonoBehaviour
     private bool _isHoldingRight;
     private readonly Vector3[] _sceneCorners = new Vector3[4];
 
+    void Awake()
+    {
+        lamp_hotspot_light.SetActive(false);
+        unLightScene.SetActive(false);
+    }
     // Start is called before the first frame update
     void Start()
     {
@@ -34,6 +42,7 @@ public class MainUIPanelController : MonoBehaviour
         }
 
         MUIEventListener.Get(lamp_hotspot).onClick = OnLampHotspotClicked;
+        MUIEventListener.Get(lamp_hotspot_light).onClick = OnLampHotspotClicked;
         MUIEventListener.Get(bed_hotspot).onClick = OnBedHotspotClicked;
         MUIEventListener.Get(desk_hotspot).onClick = OnDeskHotspotClicked;
         MUIEventListener.Get(shelf_hotspot).onClick = OnShelfHotspotClicked;
@@ -158,17 +167,17 @@ public class MainUIPanelController : MonoBehaviour
 
     private void OnLampHotspotClicked(GameObject go)
     {
-        Debug.Log("点击了煤油灯热点，显示煤油灯界面");
+        isLightScene = !isLightScene;
+        unLightScene.SetActive(isLightScene);
+        lamp_hotspot.SetActive(!isLightScene);
+        lamp_hotspot_light.SetActive(isLightScene);
         AudioManager.Instance.PlaySFX(ESFXType.Click);
-        UIManager.Instance.ShowFocusUI(FocusPanelType.Lamp, lamp_hotspot.transform.position);
     }
 
     private void OnBedHotspotClicked(GameObject go)
     {
-        Debug.Log("点击了床热点，显示床界面");
         if (GameManager.Instance.Model.GotItems.Contains(EItemType.NewsPaper))
         {
-            Debug.Log("已经获得了报纸，不显示床界面");
             return;
         }
         AudioManager.Instance.PlaySFX(ESFXType.Click);
@@ -177,14 +186,12 @@ public class MainUIPanelController : MonoBehaviour
 
     private void OnDeskHotspotClicked(GameObject go)
     {
-        Debug.Log("点击了书桌热点，显示书桌界面");
         AudioManager.Instance.PlaySFX(ESFXType.Click);
         UIManager.Instance.ShowFocusUI(FocusPanelType.Desk, desk_hotspot.transform.position);
     }
 
     private void OnShelfHotspotClicked(GameObject go)
     {
-        Debug.Log("点击了书架热点，显示书架界面");
         AudioManager.Instance.PlaySFX(ESFXType.Click);
         UIManager.Instance.ShowFocusUI(FocusPanelType.Shelf, PopEffect: false);
     }

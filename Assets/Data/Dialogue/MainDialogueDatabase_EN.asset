@@ -52,10 +52,8 @@ MonoBehaviour:
     - lineId: s3_l1
       viewMode: 0
       speaker: "\u4F60"
-      content: "The famous psychologist Wright Reid has made a new understanding
-        of the subconscious dynamics of human beings... \n''By tracing the historical
-        thread of psychological development, it helps individuals to realize that
-        current behavior is an adaptive product of past experience...''"
+      content: 'The famous psychologist Wright Reid has made a new understanding
+        of the subconscious dynamics of human beings... '
       portrait: {fileID: 21300000, guid: 066fc8bfa81b47248a95884c72b1b76c, type: 3}
       hidePortraitWhenNull: 0
       charIntervalOverride: -1
@@ -63,6 +61,18 @@ MonoBehaviour:
       onLineStartSignal: 
       onLineEndSignal: 
     - lineId: s3_l2
+      viewMode: 0
+      speaker: "\u4F60"
+      content: '''''By tracing the historical thread of psychological development,
+        it helps individuals to realize that current behavior is an adaptive product
+        of past experience...'''''
+      portrait: {fileID: 21300000, guid: 066fc8bfa81b47248a95884c72b1b76c, type: 3}
+      hidePortraitWhenNull: 0
+      charIntervalOverride: -1
+      autoAdvanceDelay: -1
+      onLineStartSignal: 
+      onLineEndSignal: 
+    - lineId: s3_l3
       viewMode: 0
       speaker: "\u4F60"
       content: This is also my memory? Something to do with the doctor's experiment?

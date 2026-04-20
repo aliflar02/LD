@@ -14,6 +14,11 @@ public class CertificateUIPanelController : MonoBehaviour
     [SerializeField] private GameObject certificatePanel;
     [SerializeField] private GameObject certificatePanel1;
     [SerializeField] private GameObject endGamePanel;
+
+    //结束流程
+    [SerializeField] private GameObject deskHotspot;
+    [SerializeField] private GameObject deskPanel;
+    [SerializeField] private GameObject notePanel;
     void Awake()
     {
         certificatePanel.SetActive(false);
@@ -21,6 +26,8 @@ public class CertificateUIPanelController : MonoBehaviour
         endGamePanel.SetActive(false);
         endGameLightScene.SetActive(false);
         endGameSceneLight.SetActive(true);
+
+        deskPanel.SetActive(false);
     }
     // Start is called before the first frame update
     void Start()
@@ -36,6 +43,7 @@ public class CertificateUIPanelController : MonoBehaviour
         {
             certificatePanel.SetActive(false);
             certificatePanel1.SetActive(true);
+            AudioManager.Instance.PlaySFX(ESFXType.RedLight);
         };
         MUIEventListener.Get(certificatePanel1).onClick = _ =>
         {
@@ -51,13 +59,6 @@ public class CertificateUIPanelController : MonoBehaviour
             AudioManager.Instance.PlaySFX(ESFXType.TrunLight);
             endGameLightScene.SetActive(true);
             endGameSceneLight.SetActive(false);
-        };
-        MUIEventListener.Get(endGameLightScene).onClick = _ =>
-        {
-            AudioManager.Instance.PlaySFX(ESFXType.Click);
-            endGameLightScene.SetActive(false);
-            endGameSceneLight.SetActive(false);
-            endGamePanel.SetActive(true);
         };
         MUIEventListener.Get(endGamePanel).onClick = _ =>
         {
@@ -79,5 +80,17 @@ public class CertificateUIPanelController : MonoBehaviour
                 });
             }
         });
+
+        MUIEventListener.Get(deskHotspot).onClick = _ =>
+        {
+            deskPanel.SetActive(true);
+        };
+        MUIEventListener.Get(notePanel).onClick = _ =>
+            {
+                AudioManager.Instance.PlaySFX(ESFXType.Click);
+                endGameLightScene.SetActive(false);
+                endGameSceneLight.SetActive(false);
+                endGamePanel.SetActive(true);
+            };
     }
 }

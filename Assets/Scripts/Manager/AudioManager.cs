@@ -33,6 +33,10 @@ public class AudioManager : MonoSingleton<AudioManager>, IAudioManager
     [SerializeField] private List<AudioClip> musicClips;
     [SerializeField] private List<AudioClip> sfxClips;
 
+    private void Start()
+    {
+        PlayBGM(EBGMType.Main);
+    }
 
     public void OnSingletonInit()
     {

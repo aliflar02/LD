@@ -36,11 +36,14 @@ public class DeskNoteItemController : MonoBehaviour
                     UIManager.Instance.ShowDialoguePanel();
                     UIManager.Instance.PlaySequence("SEQ_04_DESK_NOTEBOOK_HINT");
                 }
-                else if (model.NoteItemDic.Count == 4) //已获得所有物品
+                else if (model.NoteItemDic.Count == 3) //已获得所有物品
                 {
-                    UIManager.Instance.HideItemPanel();
-                    UIManager.Instance.ShowDialoguePanel();
-                    UIManager.Instance.PlaySequence("SEQ_07_CLUE3_COMPLETE");
+                    // UIManager.Instance.HideItemPanel();
+                    // UIManager.Instance.ShowDialoguePanel();
+                    // UIManager.Instance.PlaySequence("SEQ_07_CLUE3_COMPLETE");
+                    //画面扭曲
+                    UIManager.Instance.ShowFocusUI(FocusPanelType.Certificate, PopEffect: false);
+                    UIManager.Instance.HidePersistentUI();
                 }
             }
             else
