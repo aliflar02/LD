@@ -102,15 +102,15 @@ public class StartUIController : MonoBehaviour
 
     public void OnChineseClicked()
     {
-        SwitchLanguage(ELanguage.Chinese, SystemLanguage.ChineseSimplified);
+        SwitchLanguage(ELanguage.Chinese);
     }
 
     public void OnEnglishClicked()
     {
-        SwitchLanguage(ELanguage.English, SystemLanguage.English);
+        SwitchLanguage(ELanguage.English);
     }
 
-    private void SwitchLanguage(ELanguage targetLanguage, SystemLanguage systemLanguage)
+    private void SwitchLanguage(ELanguage targetLanguage)
     {
         if (GameManager.Instance.Model.CurrentLanguage.Value == targetLanguage)
         {
@@ -118,7 +118,6 @@ public class StartUIController : MonoBehaviour
         }
 
         GameManager.Instance.Model.CurrentLanguage.Value = targetLanguage;
-        EventBus.TriggerEvent(new DialogueLanguageChangedEvent(systemLanguage));
     }
 
     private void UpdateLanguageButtonState(ELanguage currentLanguage)

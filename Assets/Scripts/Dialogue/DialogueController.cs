@@ -92,7 +92,7 @@ public class DialogueController : MonoBehaviour
     private MUIEventListener dialogueRootListener;
     private MUIEventListener narrationRootListener;
     private IUnRegister languageChangedUnregister;
-    private SystemLanguage currentLanguage = SystemLanguage.English;
+    private ELanguage currentLanguage = ELanguage.English;
     private DialogueDatabase activeDatabase;
     private string activeIntroNarrationText = string.Empty;
 
@@ -122,6 +122,11 @@ public class DialogueController : MonoBehaviour
     private void Awake()
     {
         if (dialogueUI == null) dialogueUI = gameObject;
+        if (GameManager.Instance != null)
+        {
+            currentLanguage = GameManager.Instance.Model.CurrentLanguage.Value;
+        }
+
         ApplyLanguage(currentLanguage);
         ResolveMissingReferences();
         HookDialogueRootClick();
@@ -825,16 +830,16 @@ public class DialogueController : MonoBehaviour
             return;
         }
 
-        languageChangedUnregister = EventBus.RegisterEvent<DialogueLanguageChangedEvent>(OnLanguageChanged);
+        languageChangedUnregister = GameManager.Instance.Model.CurrentLanguage.RegisterWithInitValue(OnLanguageChanged);
     }
 
-    private void OnLanguageChanged(DialogueLanguageChangedEvent evt)
+    private void OnLanguageChanged(ELanguage language)
     {
-        currentLanguage = evt.Language;
+        currentLanguage = language;
         ApplyLanguage(currentLanguage);
     }
 
-    private void ApplyLanguage(SystemLanguage language)
+    private void ApplyLanguage(ELanguage language)
     {
         activeDatabase = ResolveDatabase(language);
         activeIntroNarrationText = ResolveIntroNarrationText(language);
@@ -850,32 +855,24 @@ public class DialogueController : MonoBehaviour
         return activeDatabase;
     }
 
-    private DialogueDatabase ResolveDatabase(SystemLanguage language)
+    private DialogueDatabase ResolveDatabase(ELanguage language)
     {
         return language switch
         {
-            SystemLanguage.English => databaseEN != null ? databaseEN : databaseCN,
-            SystemLanguage.Chinese => databaseCN != null ? databaseCN : databaseEN,
-            SystemLanguage.ChineseSimplified => databaseCN != null ? databaseCN : databaseEN,
-            SystemLanguage.ChineseTraditional => databaseCN != null ? databaseCN : databaseEN,
+            ELanguage.English => databaseEN != null ? databaseEN : databaseCN,
+            ELanguage.Chinese => databaseCN != null ? databaseCN : databaseEN,
             _ => databaseCN != null ? databaseCN : databaseEN
         };
     }
 
-    private string ResolveIntroNarrationText(SystemLanguage language)
+    private string ResolveIntroNarrationText(ELanguage language)
     {
         return language switch
         {
-            SystemLanguage.English => !string.IsNullOrWhiteSpace(introNarrationTextEN)
+            ELanguage.English => !string.IsNullOrWhiteSpace(introNarrationTextEN)
                 ? introNarrationTextEN
                 : introNarrationTextCN,
-            SystemLanguage.Chinese => !string.IsNullOrWhiteSpace(introNarrationTextCN)
-                ? introNarrationTextCN
-                : introNarrationTextEN,
-            SystemLanguage.ChineseSimplified => !string.IsNullOrWhiteSpace(introNarrationTextCN)
-                ? introNarrationTextCN
-                : introNarrationTextEN,
-            SystemLanguage.ChineseTraditional => !string.IsNullOrWhiteSpace(introNarrationTextCN)
+            ELanguage.Chinese => !string.IsNullOrWhiteSpace(introNarrationTextCN)
                 ? introNarrationTextCN
                 : introNarrationTextEN,
             _ => !string.IsNullOrWhiteSpace(introNarrationTextCN)
