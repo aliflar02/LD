@@ -30,13 +30,7 @@ public class DeskNoteItemController : MonoBehaviour
                 model.NoteItemDic[_.name] = currentItemType;
                 Init(currentItemType);
                 UIManager.Instance.UseItem(currentItemType);
-                if (model.NoteItemDic.Count == 1) //第一次使用物品，打开对话
-                {
-                    UIManager.Instance.HideItemPanel();
-                    UIManager.Instance.ShowDialoguePanel();
-                    UIManager.Instance.PlaySequence("SEQ_04_DESK_NOTEBOOK_HINT");
-                }
-                else if (model.NoteItemDic.Count == 3) //已获得所有物品
+                if (model.NoteItemDic.Count == 3) //已获得所有物品
                 {
                     // UIManager.Instance.HideItemPanel();
                     // UIManager.Instance.ShowDialoguePanel();

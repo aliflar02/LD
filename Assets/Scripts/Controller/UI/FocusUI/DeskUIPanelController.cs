@@ -6,11 +6,30 @@ using UnityEngine;
 public class DeskUIPanelController : MonoBehaviour
 {
     [SerializeField] private GameObject boxObject;
+    [SerializeField] private GameObject notePanel;
 
     [SerializeField] private List<DeskNoteItemController> noteItemControllers;
     // Start is called before the first frame update
     void Start()
     {
+        MUIEventListener.Get(notePanel).onClick = _ =>
+        {
+            if (GameManager.Instance.Model.NoteItemDic.Count == 0)
+            {
+                Debug.Log("点击了笔记面板，但没有物品已使用");
+                UIManager.Instance.HideItemPanel();
+                UIManager.Instance.ShowDialoguePanel();
+                UIManager.Instance.PlaySequence("SEQ_04_DESK_NOTEBOOK_HINT");
+            }
+        };
+        UIManager.Instance.RegisterSequenceFinishedListener(sequenceId =>
+        {
+            if (sequenceId == "SEQ_04_DESK_NOTEBOOK_HINT")
+            {
+                UIManager.Instance.ShowItemPanel();
+            }
+        });
+
         MUIEventListener.Get(boxObject).onClick = _ =>
         {
             AudioManager.Instance.PlaySFX(ESFXType.Click);
