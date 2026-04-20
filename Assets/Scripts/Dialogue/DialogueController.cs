@@ -74,9 +74,11 @@ public class DialogueController : MonoBehaviour
     private readonly Dictionary<GameObject, bool> cachedActiveStates = new();
 
     private Coroutine playRoutine;
+    private Coroutine introNarrationRoutine;
     private bool advanceRequested;
     private bool isPlaying;
     private bool isShowingIntroNarration;
+    private bool isIntroNarrationTyping;
     private string currentSequenceId = string.Empty;
     private MUIEventListener dialogueRootListener;
     private MUIEventListener narrationRootListener;
@@ -138,6 +140,18 @@ public class DialogueController : MonoBehaviour
 
     private void Update()
     {
+        if (isShowingIntroNarration && isIntroNarrationTyping)
+        {
+            if ((allowMouseClickAdvance && Input.GetMouseButtonDown(0)) ||
+                (allowSpaceAdvance && Input.GetKeyDown(KeyCode.Space)) ||
+                (allowEnterAdvance && (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter))))
+            {
+                advanceRequested = true;
+            }
+
+            return;
+        }
+
         if (!isPlaying) return;
 
         if ((allowMouseClickAdvance && Input.GetMouseButtonDown(0)) ||
@@ -150,6 +164,7 @@ public class DialogueController : MonoBehaviour
 
     private void OnDestroy()
     {
+        StopIntroNarrationTyping();
         UnHookDialogueRootClick();
         UnHookNarrationRootClick();
     }
@@ -214,6 +229,7 @@ public class DialogueController : MonoBehaviour
             StopCoroutine(playRoutine);
         }
 
+        StopIntroNarrationTyping();
         CleanupPlaybackState();
         playRoutine = StartCoroutine(PlaySequenceRoutine(sequence, safeStartLineIndex));
         return true;
@@ -226,6 +242,7 @@ public class DialogueController : MonoBehaviour
             StopCoroutine(playRoutine);
         }
 
+        StopIntroNarrationTyping();
         CleanupPlaybackState();
     }
 
@@ -478,6 +495,7 @@ public class DialogueController : MonoBehaviour
 
     private void ShowIntroNarration()
     {
+        StopIntroNarrationTyping();
         isShowingIntroNarration = true;
         isPlaying = false;
         advanceRequested = false;
@@ -500,8 +518,9 @@ public class DialogueController : MonoBehaviour
 
         if (narrationText != null)
         {
-            narrationText.text = introNarrationText ?? string.Empty;
+            narrationText.text = string.Empty;
             narrationText.maxVisibleCharacters = int.MaxValue;
+            introNarrationRoutine = StartCoroutine(PlayIntroNarrationRoutine());
         }
 
         if (dialogueText != null)
@@ -522,8 +541,60 @@ public class DialogueController : MonoBehaviour
         }
     }
 
+    private IEnumerator PlayIntroNarrationRoutine()
+    {
+        if (narrationText == null)
+        {
+            isIntroNarrationTyping = false;
+            introNarrationRoutine = null;
+            yield break;
+        }
+
+        isIntroNarrationTyping = true;
+        var content = introNarrationText ?? string.Empty;
+        narrationText.text = content;
+        narrationText.maxVisibleCharacters = 0;
+        narrationText.ForceMeshUpdate();
+
+        var visibleCharCount = narrationText.textInfo.characterCount;
+        for (var visible = 1; visible <= visibleCharCount; visible++)
+        {
+            if (!isShowingIntroNarration)
+            {
+                break;
+            }
+
+            if (advanceRequested)
+            {
+                advanceRequested = false;
+                break;
+            }
+
+            narrationText.maxVisibleCharacters = visible;
+            yield return new WaitForSeconds(defaultCharInterval);
+        }
+
+        narrationText.maxVisibleCharacters = int.MaxValue;
+        isIntroNarrationTyping = false;
+        advanceRequested = false;
+        introNarrationRoutine = null;
+    }
+
+    private void StopIntroNarrationTyping()
+    {
+        if (introNarrationRoutine != null)
+        {
+            StopCoroutine(introNarrationRoutine);
+            introNarrationRoutine = null;
+        }
+
+        isIntroNarrationTyping = false;
+        advanceRequested = false;
+    }
+
     private void BeginIntroDialogue()
     {
+        StopIntroNarrationTyping();
         isShowingIntroNarration = false;
 
         if (string.IsNullOrWhiteSpace(introSequenceId))
@@ -712,8 +783,14 @@ public class DialogueController : MonoBehaviour
 
     private void OnNarrationRootClicked(GameObject _)
     {
-        if (isShowingIntroNarration && !isPlaying)
+        if (isShowingIntroNarration)
         {
+            if (isIntroNarrationTyping)
+            {
+                advanceRequested = true;
+                return;
+            }
+
             BeginIntroDialogue();
             return;
         }
